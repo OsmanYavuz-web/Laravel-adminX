@@ -9,6 +9,7 @@ use Flux\Flux;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\MediaShare;
+use App\Models\SystemSetting;
 
 new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
     use WithFileUploads, WithPagination;
@@ -33,6 +34,45 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
         abort_unless(auth()->user()->can('media.view') || auth()->user()->hasRole('super-admin'), 403);
     }
 
+    public function getPhpUploadMaxSize(): string
+    {
+        return ini_get('upload_max_filesize');
+    }
+
+    public function getPhpPostMaxSize(): string
+    {
+        return ini_get('post_max_size');
+    }
+
+    public function getPhpLimitWarning(): ?string
+    {
+        $phpUpload = $this->parseBytes(ini_get('upload_max_filesize'));
+        $phpPost = $this->parseBytes(ini_get('post_max_size'));
+        $appMax = $this->getUploadSettings()['maxSize'] * 1024 * 1024;
+
+        $effectiveLimit = min($phpUpload, $phpPost);
+        $effectiveLimitMB = round($effectiveLimit / 1024 / 1024);
+
+        if ($effectiveLimit < $appMax) {
+            return __('PHP upload limits are lower than the configured maximum. Effective limit: :size MB. Contact your server administrator to increase upload_max_filesize and post_max_size in php.ini.', ['size' => $effectiveLimitMB]);
+        }
+
+        return null;
+    }
+
+    private function parseBytes(string $value): int
+    {
+        $value = trim($value);
+        $unit = strtolower(substr($value, -1));
+        $num = (int) $value;
+        return match ($unit) {
+            'g' => $num * 1024 * 1024 * 1024,
+            'm' => $num * 1024 * 1024,
+            'k' => $num * 1024,
+            default => $num,
+        };
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();
@@ -43,33 +83,66 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
         $this->resetPage();
     }
 
+    protected function getUploadSettings(): array
+    {
+        $maxSize = (int) SystemSetting::get('max_upload_size', 20);
+        $allowedTypes = SystemSetting::get('allowed_file_types', 'jpg,jpeg,png,gif,webp,svg,pdf,doc,docx,txt,xlsx,csv,zip,rar,7z,tar,gz');
+
+        return [
+            'maxSize' => $maxSize,
+            'maxSizeKB' => $maxSize * 1024,
+            'allowedTypes' => $allowedTypes,
+            'allowedTypesArray' => explode(',', $allowedTypes),
+            'allowedMimes' => str_replace(',', ',', $allowedTypes),
+        ];
+    }
+
     public function saveUploads(): void
     {
         abort_unless(auth()->user()->can('media.create') || auth()->user()->hasRole('super-admin'), 403);
 
-        $this->validate([
-            'uploads.*' => ['required', 'file', 'max:20480'], // max 20MB per file
-        ]);
+        $settings = $this->getUploadSettings();
 
-        $disk = Storage::disk('public');
-        $uploadedCount = 0;
+        try {
+            $this->validate([
+                'uploads.*' => [
+                    'required',
+                    'file',
+                    'max:' . $settings['maxSizeKB'],
+                    'mimes:' . $settings['allowedTypes'],
+                ],
+            ], [
+                'uploads.*.mimes' => __('Only image, document, or archive files are allowed (:types).', ['types' => str_replace(',', ', ', $settings['allowedTypes'])]),
+                'uploads.*.max' => __('Each file must be under :size MB.', ['size' => $settings['maxSize']]),
+            ]);
 
-        foreach ($this->uploads as $file) {
-            $originalName = $file->getClientOriginalName();
-            $filename = Str::slug(pathinfo($originalName, PATHINFO_FILENAME)) . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('media', $filename, 'public');
-            $uploadedCount++;
+            $disk = Storage::disk('local');
+            $uploadedCount = 0;
+
+            foreach ($this->uploads as $file) {
+                $originalName = $file->getClientOriginalName();
+                $filename = Str::slug(pathinfo($originalName, PATHINFO_FILENAME)) . '_' . time() . '.' . $file->getClientOriginalExtension();
+                $file->storeAs('media', $filename, 'local');
+                $uploadedCount++;
+            }
+
+            \App\Models\ActivityLog::record(
+                event: 'media_uploaded',
+                description: __(':count files uploaded to Media Library.', ['count' => $uploadedCount])
+            );
+
+            $this->reset('uploads');
+            $this->showUploadModal = false;
+
+            Flux::toast(variant: 'success', text: __(':count files uploaded successfully.', ['count' => $uploadedCount]));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->reset('uploads');
+            $messages = collect($e->errors())->flatten()->implode("\n");
+            Flux::toast(variant: 'danger', text: $messages);
+        } catch (\Throwable $e) {
+            $this->reset('uploads');
+            Flux::toast(variant: 'danger', text: __('Upload failed. The file may be too large or an error occurred. Please refresh and try again.'));
         }
-
-        \App\Models\ActivityLog::record(
-            event: 'media_uploaded',
-            description: __(':count files uploaded to Media Library.', ['count' => $uploadedCount])
-        );
-
-        $this->reset('uploads');
-        $this->showUploadModal = false;
-
-        Flux::toast(variant: 'success', text: __(':count files uploaded successfully.', ['count' => $uploadedCount]));
     }
 
     public function deleteFile(string $filename): void
@@ -77,8 +150,8 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
         abort_unless(auth()->user()->can('media.delete') || auth()->user()->hasRole('super-admin'), 403);
 
         $path = "media/{$filename}";
-        if (Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
+        if (Storage::disk('local')->exists($path)) {
+            Storage::disk('local')->delete($path);
             MediaShare::where('file_path', $path)->delete();
 
             \App\Models\ActivityLog::record(
@@ -145,7 +218,7 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
 
     public function with(): array
     {
-        $disk = Storage::disk('public');
+        $disk = Storage::disk('local');
         $files = $disk->exists('media') ? $disk->files('media') : [];
         $mediaList = [];
 
@@ -197,6 +270,8 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
             $activeShares = MediaShare::with(['views.user'])->where('file_path', $this->selectedMedia['path'])->latest()->get();
         }
 
+        $uploadSettings = $this->getUploadSettings();
+
         return [
             'mediaItems' => $mediaList,
             'totalCount' => count($mediaList),
@@ -204,6 +279,9 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
             'documentCount' => count(array_filter($mediaList, fn($m) => $m['category'] === 'document')),
             'archiveCount' => count(array_filter($mediaList, fn($m) => $m['category'] === 'archive')),
             'activeShares' => $activeShares,
+            'maxUploadSize' => $uploadSettings['maxSize'],
+            'allowedTypes' => $uploadSettings['allowedTypes'],
+            'phpLimitWarning' => $this->getPhpLimitWarning(),
         ];
     }
 
@@ -218,7 +296,20 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
         return round($bytes, 2) . ' ' . $units[$pow];
     }
 }; ?>
-<div>
+<div x-data="{ uploadErrorMsg: '{{ __('Upload failed. The file may be too large or an error occurred.') }}' }"
+     x-init="
+         window.addEventListener('unhandledrejection', (e) => {
+             if (e.reason?.message?.includes('JSON') || (e.reason + '').includes('JSON')) {
+                 Flux.toast({ variant: 'danger', text: uploadErrorMsg });
+             }
+         });
+         window.addEventListener('error', (e) => {
+             if (e.message?.includes('JSON.parse') || e.filename?.includes('livewire')) {
+                 Flux.toast({ variant: 'danger', text: uploadErrorMsg });
+             }
+         });
+     "
+     x-on:livewire-upload-error="Flux.toast({ variant: 'danger', text: uploadErrorMsg })">
     <div class="space-y-6">
         {{-- Header & Upload Action --}}
         <div class="flex items-center justify-between">
@@ -368,7 +459,7 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
 
         {{-- Share Link Modal --}}
         @if($selectedMedia)
-            <flux:modal wire:model="showShareModal" class="max-w-2xl min-w-[550px] p-4">
+            <flux:modal wire:model="showShareModal" class="max-w-2xl min-w-[750px] p-4">
                 <div class="space-y-6">
                     <div class="flex items-start gap-4">
                         <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
@@ -554,15 +645,22 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
                             {{ __('Upload Media Files') }}
                         </flux:heading>
                         <flux:subheading class="text-xs text-zinc-500 mt-0.5">
-                            {{ __('Drag and drop or select files to upload (Max 20MB per file).') }}
+                            {{ __('Drag and drop or select files to upload (Max :size MB per file).', ['size' => $maxUploadSize]) }}
                         </flux:subheading>
                     </div>
                 </div>
 
+                @if($phpLimitWarning)
+                    <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs flex items-start gap-2">
+                        <flux:icon icon="exclamation-triangle" class="size-4 mt-0.5 shrink-0" />
+                        <span>{{ $phpLimitWarning }}</span>
+                    </div>
+                @endif
+
                 {{-- Drag & Drop Area --}}
                 <div class="space-y-4">
                     <div
-                        x-data="{ isDragging: false }"
+                        x-data="{ isDragging: false, maxBytes: {{ $maxUploadSize }} * 1024 * 1024 }"
                         @dragover.prevent="isDragging = true"
                         @dragleave.prevent="isDragging = false"
                         @drop.prevent="isDragging = false"
@@ -573,7 +671,15 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
                             type="file"
                             wire:model="uploads"
                             multiple
+                            accept=".{{ str_replace(',', ',.', $allowedTypes) }}"
                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            @change="
+                                const oversized = Array.from($el.files).filter(f => f.size > maxBytes);
+                                if (oversized.length > 0) {
+                                    Flux.toast({ variant: 'warning', text: '{{ __('Some files exceed the maximum upload size of :size MB.', ['size' => $maxUploadSize]) }}' });
+                                    $el.value = '';
+                                }
+                            "
                         />
 
                         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand/15 text-brand dark:text-brand-accent mx-auto">
@@ -584,7 +690,7 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
                             <span class="font-bold text-sm text-zinc-800 dark:text-zinc-200">{{ __('Click to upload') }}</span>
                             <span class="text-xs text-zinc-500">{{ __('or drag and drop files here') }}</span>
                         </div>
-                        <div class="text-[11px] text-zinc-400 font-medium">PNG, JPG, WEBP, SVG, PDF, DOCX, ZIP (Max 20MB)</div>
+                        <div class="text-[11px] text-zinc-400 font-medium">{{ strtoupper($allowedTypes) }} (Max {{ $maxUploadSize }}MB)</div>
                     </div>
 
                     @if(!empty($uploads))
@@ -683,11 +789,11 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
 
                         <div class="flex items-center gap-3">
                             <flux:button variant="primary" icon="share" wire:click="openShareModal({{ json_encode($selectedMedia) }})" class="bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer px-4">
-                                {{ __('Paylaş') }}
+                                {{ __('Share') }}
                             </flux:button>
                             <a href="{{ $selectedMedia['url'] }}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-white text-xs font-bold transition-colors inline-flex items-center gap-1.5">
                                 <flux:icon icon="arrow-top-right-on-square" class="size-4" />
-                                <span>{{ __('Yeni Sekmede Aç') }}</span>
+                                <span>{{ __('Open in New Tab') }}</span>
                             </a>
                             <flux:button variant="filled" wire:click="$set('showDetailModal', false)" class="cursor-pointer px-6">
                                 {{ __('Close') }}

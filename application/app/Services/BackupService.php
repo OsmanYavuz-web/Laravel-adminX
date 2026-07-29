@@ -145,11 +145,11 @@ class BackupService
     {
         $zip = new ZipArchive();
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
-            $publicStorage = storage_path('app/public');
-            if (File::exists($publicStorage)) {
-                $files = File::allFiles($publicStorage);
+            $privateMedia = storage_path('app/private/media');
+            if (File::exists($privateMedia)) {
+                $files = File::allFiles($privateMedia);
                 foreach ($files as $file) {
-                    $relativePath = 'public/' . $file->getRelativePathname();
+                    $relativePath = 'media/' . $file->getRelativePathname();
                     $zip->addFile($file->getRealPath(), $relativePath);
                 }
             }
@@ -170,12 +170,12 @@ class BackupService
                 $zip->addFile($dbPath, 'database.sqlite');
             }
 
-            // Add public files
-            $publicStorage = storage_path('app/public');
-            if (File::exists($publicStorage)) {
-                $files = File::allFiles($publicStorage);
+            // Add private media files
+            $privateMedia = storage_path('app/private/media');
+            if (File::exists($privateMedia)) {
+                $files = File::allFiles($privateMedia);
                 foreach ($files as $file) {
-                    $relativePath = 'storage/' . $file->getRelativePathname();
+                    $relativePath = 'private/media/' . $file->getRelativePathname();
                     $zip->addFile($file->getRealPath(), $relativePath);
                 }
             }

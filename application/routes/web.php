@@ -2,8 +2,29 @@
 
 use Illuminate\Support\Facades\Route;
 
+use Illuminate\Support\Facades\Storage;
+
 Route::view('/', 'welcome')->name('home');
 Route::livewire('/share/{token}', 'pages::media.share')->name('media.share.public');
+
+Route::get('/share/file/{token}/{filename}', function (string $token, string $filename) {
+    $share = \App\Models\MediaShare::where('share_token', $token)->firstOrFail();
+
+    if ($share->isExpired()) {
+        abort(410);
+    }
+
+    if ($share->isPasswordProtected()) {
+        abort_unless(session('share_unlocked_' . $share->id) === true, 403);
+    }
+
+    $path = "media/{$filename}";
+    if (Storage::disk('local')->exists($path) && $share->file_path === $path) {
+        return response()->file(Storage::disk('local')->path($path));
+    }
+
+    abort(404);
+})->name('media.share.file');
 
 Route::get('/locale/{lang}', function (string $lang) {
     $locales = config('app.available_locales', []);
@@ -36,9 +57,11 @@ Route::prefix($adminPrefix)->middleware(['auth', 'verified'])->group(function ()
     Route::livewire('settings/backups', 'pages::settings.backups')->name('settings.backups');
     Route::livewire('media', 'pages::media.index')->name('media.index');
     Route::get('/media/file/{filename}', function (string $filename) {
+        abort_unless(auth()->user()->can('media.view') || auth()->user()->hasRole('super-admin'), 403);
+
         $path = "media/{$filename}";
-        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
-            return response()->file(\Illuminate\Support\Facades\Storage::disk('public')->path($path));
+        if (Storage::disk('local')->exists($path)) {
+            return response()->file(Storage::disk('local')->path($path));
         }
         abort(404);
     })->name('media.file');

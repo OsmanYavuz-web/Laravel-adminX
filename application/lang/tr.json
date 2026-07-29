@@ -384,5 +384,21 @@
     "Public": "Genel",
     "Copied!": "Kopyalandı!",
     "Automated backup schedule updated.": "Otomatik yedekleme zamanlaması güncellendi.",
-    "User Agent": "Tarayıcı (User Agent)"
+    "User Agent": "Tarayıcı (User Agent)",
+    "Only image, document, or archive files are allowed (jpg, png, pdf, zip, etc.).": "Sadece resim, belge veya arşiv dosyalarına izin verilir (jpg, png, pdf, zip, vb.).",
+    "Each file must be under 20 MB.": "Her dosya en fazla 20 MB olabilir.",
+    "Upload failed. The file may be too large or an error occurred. Please refresh and try again.": "Yükleme başarısız oldu. Dosya çok büyük veya bir hata oluştu. Lütfen sayfayı yenileyip tekrar deneyin.",
+    "Upload failed. The file may be too large or an error occurred.": "Yükleme başarısız oldu. Dosya çok büyük veya bir hata oluştu.",
+    "Some files exceed the maximum upload size of :size MB.": "Bazı dosyalar maksimum yükleme boyutunu (:size MB) aşıyor.",
+    "PHP upload limits are lower than the configured maximum. Effective limit: :size MB. Contact your server administrator to increase upload_max_filesize and post_max_size in php.ini.": "PHP yükleme limitleri yapılandırılan maksimum değerden düşük. Etkin limit: :size MB. php.ini dosyasında upload_max_filesize ve post_max_size değerlerini artırmak için sunucu yöneticinize başvurun.",
+    "Media Upload Settings": "Medya Yükleme Ayarları",
+    "Configure file upload limits and allowed file types for the Media Library.": "Medya Kütüphanesi için dosya yükleme limitlerini ve izin verilen dosya türlerini yapılandırın.",
+    "Maximum Upload Size (MB)": "Maksimum Yükleme Boyutu (MB)",
+    "Allowed File Types": "İzin Verilen Dosya Türleri",
+    "File types must be comma-separated extensions only (e.g. jpg,png,pdf).": "Dosya türleri virgülle ayrılmış uzantılar olmalıdır (örn. jpg,png,pdf).",
+    "Drag and drop or select files to upload (Max :size MB per file).": "Yüklemek için dosyaları sürükleyip bırakın veya seçin (Dosya başı maks. :size MB).",
+    "Only image, document, or archive files are allowed (:types).": "Sadece resim, belge veya arşiv dosyalarına izin verilir (:types).",
+    "Each file must be under :size MB.": "Her dosya en fazla :size MB olabilir.",
+    "Expand sidebar": "Menüyü Genişlet",
+    "Collapse sidebar": "Menüyü Daralt"
 }

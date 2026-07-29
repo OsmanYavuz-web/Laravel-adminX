@@ -34,6 +34,7 @@ new #[Title('Shared File')] #[Layout('layouts.share')] class extends Component {
 
         if ($this->share->checkPassword($this->passwordInput)) {
             $this->unlocked = true;
+            session(['share_unlocked_' . $this->share->id => true]);
             $this->share->increment('views_count');
             MediaShareView::recordView($this->share, 'viewed');
         } else {
@@ -49,7 +50,7 @@ new #[Title('Shared File')] #[Layout('layouts.share')] class extends Component {
 
         MediaShareView::recordView($this->share, 'downloaded');
 
-        $disk = Storage::disk('public');
+        $disk = Storage::disk('local');
         if ($disk->exists($this->share->file_path)) {
             return response()->download($disk->path($this->share->file_path));
         }
@@ -61,7 +62,7 @@ new #[Title('Shared File')] #[Layout('layouts.share')] class extends Component {
     {
         $fileInfo = null;
         if ($this->share && $this->unlocked && !$this->share->isExpired()) {
-            $disk = Storage::disk('public');
+            $disk = Storage::disk('local');
             if ($disk->exists($this->share->file_path)) {
                 $filename = basename($this->share->file_path);
                 $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
@@ -80,7 +81,7 @@ new #[Title('Shared File')] #[Layout('layouts.share')] class extends Component {
                     'size' => $size,
                     'formatted_size' => $this->formatBytes($size),
                     'category' => $category,
-                    'url' => route('media.file', ['filename' => $filename]),
+                    'url' => route('media.share.file', ['token' => $this->token, 'filename' => $filename]),
                 ];
             }
         }
@@ -181,7 +182,7 @@ new #[Title('Shared File')] #[Layout('layouts.share')] class extends Component {
                         @enderror
                     </div>
 
-                    <flux:button variant="primary" type="submit" icon="lock-open" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-zinc-950 font-black py-4 text-sm rounded-xl shadow-xl shadow-amber-500/20 transition-all cursor-pointer">
+                    <flux:button variant="primary" type="submit" icon="lock-open" class="w-full bg-brand hover:bg-brand-hover text-white font-bold py-3.5 text-sm rounded-xl shadow-xl shadow-brand/25 transition-all cursor-pointer">
                         {{ __('Unlock and View') }}
                     </flux:button>
                 </form>
@@ -231,7 +232,7 @@ new #[Title('Shared File')] #[Layout('layouts.share')] class extends Component {
                 </div>
 
                 {{-- Action Download Button --}}
-                <flux:button variant="primary" wire:click="download" icon="arrow-down-tray" class="w-full bg-gradient-to-r from-brand to-indigo-600 hover:from-brand-hover hover:to-indigo-500 text-white font-black py-4 text-sm rounded-2xl shadow-xl shadow-brand/25 transition-all cursor-pointer">
+                <flux:button variant="primary" wire:click="download" icon="arrow-down-tray" class="w-full bg-brand hover:bg-brand-hover text-white font-bold py-3.5 text-sm rounded-xl shadow-xl shadow-brand/25 transition-all cursor-pointer">
                     {{ __('Download File') }}
                 </flux:button>
             </div>

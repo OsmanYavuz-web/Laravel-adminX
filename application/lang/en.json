@@ -360,5 +360,18 @@
     "Default language updated.": "Default language updated.",
     "Automated backup schedule updated.": "Automated backup schedule updated.",
     "Diff": "Diff",
-    "User Agent": "User Agent"
+    "User Agent": "User Agent",
+    "Only image, document, or archive files are allowed (jpg, png, pdf, zip, etc.).": "Only image, document, or archive files are allowed (jpg, png, pdf, zip, etc.).",
+    "Each file must be under 20 MB.": "Each file must be under 20 MB.",
+    "Upload failed. The file may be too large or an error occurred. Please refresh and try again.": "Upload failed. The file may be too large or an error occurred. Please refresh and try again.",
+    "Media Upload Settings": "Media Upload Settings",
+    "Configure file upload limits and allowed file types for the Media Library.": "Configure file upload limits and allowed file types for the Media Library.",
+    "Maximum Upload Size (MB)": "Maximum Upload Size (MB)",
+    "Allowed File Types": "Allowed File Types",
+    "File types must be comma-separated extensions only (e.g. jpg,png,pdf).": "File types must be comma-separated extensions only (e.g. jpg,png,pdf).",
+    "Drag and drop or select files to upload (Max :size MB per file).": "Drag and drop or select files to upload (Max :size MB per file).",
+    "Only image, document, or archive files are allowed (:types).": "Only image, document, or archive files are allowed (:types).",
+    "Each file must be under :size MB.": "Each file must be under :size MB.",
+    "Expand sidebar": "Expand sidebar",
+    "Collapse sidebar": "Collapse sidebar"
 }

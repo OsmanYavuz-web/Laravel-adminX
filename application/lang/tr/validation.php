@@ -12,6 +12,7 @@ return [
         'string' => ':attribute en az :min karakter olmalıdır.',
         'array' => ':attribute en az :min öge içermelidir.',
     ],
+    'mimes' => ':attribute, :values türünde bir dosya olmalıdır.',
     'max' => [
         'numeric' => ':attribute en fazla :max olmalıdır.',
         'file' => ':attribute en fazla :max kilobayt olabilir.',

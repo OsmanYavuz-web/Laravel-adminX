@@ -14,6 +14,8 @@ new #[Title('System Settings')] #[Layout('layouts.app')] class extends Component
     public string $appName = 'Laravel-adminX';
     public string $themeColor = 'emerald';
     public string $themeCustomColor = '#059669';
+    public int $maxUploadSize = 20;
+    public string $allowedFileTypes = '';
 
     public function mount(): void
     {
@@ -25,6 +27,8 @@ new #[Title('System Settings')] #[Layout('layouts.app')] class extends Component
         $this->appName = SystemSetting::get('app_name', config('app.name', 'Laravel-adminX'));
         $this->themeColor = SystemSetting::get('theme_color', 'emerald');
         $this->themeCustomColor = SystemSetting::get('theme_custom_color', '#059669');
+        $this->maxUploadSize = (int) SystemSetting::get('max_upload_size', 20);
+        $this->allowedFileTypes = SystemSetting::get('allowed_file_types', 'jpg,jpeg,png,gif,webp,svg,pdf,doc,docx,txt,xlsx,csv,zip,rar,7z,tar,gz');
     }
 
     public function saveSystemSettings(): void
@@ -39,6 +43,10 @@ new #[Title('System Settings')] #[Layout('layouts.app')] class extends Component
             'themeColor' => ['required', 'string'],
             'themeCustomColor' => ['nullable', 'string', 'max:20'],
             'allowRegistration' => ['required', 'boolean'],
+            'maxUploadSize' => ['required', 'integer', 'min:1', 'max:512'],
+            'allowedFileTypes' => ['required', 'string', 'regex:/^[a-z0-9,]+$/'],
+        ], [
+            'allowedFileTypes.regex' => __('File types must be comma-separated extensions only (e.g. jpg,png,pdf).'),
         ]);
 
         SystemSetting::set('allow_registration', $this->allowRegistration ? 'true' : 'false', 'general');
@@ -48,6 +56,8 @@ new #[Title('System Settings')] #[Layout('layouts.app')] class extends Component
         SystemSetting::set('app_name', $this->appName, 'general');
         SystemSetting::set('theme_color', $this->themeColor, 'theme');
         SystemSetting::set('theme_custom_color', $this->themeCustomColor, 'theme');
+        SystemSetting::set('max_upload_size', (string) $this->maxUploadSize, 'media');
+        SystemSetting::set('allowed_file_types', $this->allowedFileTypes, 'media');
 
         // Dynamically apply timezone for current session
         config(['app.timezone' => $this->timezone]);
@@ -144,6 +154,21 @@ new #[Title('System Settings')] #[Layout('layouts.app')] class extends Component
                             <flux:input wire:model="themeCustomColor" type="color" :label="__('Custom Hex Color')" />
                         </div>
                     @endif
+                </div>
+
+                <flux:separator />
+
+                {{-- Media Upload Settings --}}
+                <div class="space-y-4">
+                    <div>
+                        <flux:heading size="lg">{{ __('Media Upload Settings') }}</flux:heading>
+                        <flux:subheading class="text-xs">{{ __('Configure file upload limits and allowed file types for the Media Library.') }}</flux:subheading>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <flux:input wire:model="allowedFileTypes" :label="__('Allowed File Types')" icon="document-text" description="jpg,jpeg,png,pdf,zip,..." />
+                        <flux:input wire:model="maxUploadSize" type="number" min="1" max="512" :label="__('Maximum Upload Size (MB)')" description="Maximum single file upload size in megabytes" />
+                    </div>
                 </div>
 
                 <flux:separator />
