@@ -173,20 +173,36 @@ new #[Title('Roles & Permissions')] #[Layout('layouts.app')] class extends Compo
                         </div>
                     </div>
 
-                    <div class="space-y-2">
-                        <div class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                            {{ __('Permissions') }} ({{ $role->permissions->count() }}):
-                        </div>
-                        <div class="flex flex-wrap gap-1.5 pt-1">
-                            @forelse($role->permissions as $perm)
+                    @php $permCount = $role->permissions->count(); @endphp
+                    <div x-data="{ expanded: false }" class="space-y-2">
+                        <button @click="expanded = !expanded" class="w-full flex items-center justify-between text-xs font-semibold text-zinc-400 uppercase tracking-wider hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors cursor-pointer" type="button">
+                            <span>{{ __('Permissions') }} ({{ $permCount }}):</span>
+                            <flux:icon icon="chevron-down" class="size-4 transition-transform duration-200" :class="expanded && 'rotate-180'" />
+                        </button>
+                        <div x-show="!expanded" class="flex flex-wrap gap-1.5 pt-1">
+                            @foreach($role->permissions->take(5) as $perm)
                                 <flux:badge size="sm" variant="subtle" class="bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-medium text-xs flex items-center gap-1">
                                     <flux:icon icon="key" class="size-3 text-brand" />
                                     <span>{{ $perm->getTranslation('display_name', app()->getLocale(), false) ?: $perm->name }}</span>
                                 </flux:badge>
-                            @empty
-                                <span class="text-xs italic text-zinc-400">{{ __('No permissions assigned') }}</span>
-                            @endforelse
+                            @endforeach
+                            @if($permCount > 5)
+                                <button @click="expanded = true" class="text-xs text-brand hover:text-brand-hover font-semibold cursor-pointer" type="button">+{{ $permCount - 5 }} {{ __('more') }}</button>
+                            @endif
                         </div>
+                        <div x-show="expanded" x-cloak class="flex flex-wrap gap-1.5 pt-1">
+                            @foreach($role->permissions as $perm)
+                                <flux:badge size="sm" variant="subtle" class="bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-medium text-xs flex items-center gap-1">
+                                    <flux:icon icon="key" class="size-3 text-brand" />
+                                    <span>{{ $perm->getTranslation('display_name', app()->getLocale(), false) ?: $perm->name }}</span>
+                                </flux:badge>
+                            @endforeach
+                        </div>
+                        @if($permCount > 5)
+                            <button x-show="expanded" x-cloak @click="expanded = false" class="text-xs text-brand hover:text-brand-hover font-semibold cursor-pointer flex items-center gap-1 mt-1" type="button">
+                                <flux:icon icon="chevron-up" class="size-3" /> {{ __('Show less') }}
+                            </button>
+                        @endif
                     </div>
                 </div>
             @endforeach

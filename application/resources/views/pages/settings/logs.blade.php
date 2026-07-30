@@ -93,7 +93,7 @@ new #[Title('Activity Logs')] #[Layout('layouts.app')] class extends Component {
                 <flux:subheading>{{ __('Track user logins, model changes, and system audit events.') }}</flux:subheading>
             </div>
             @canany(['logs.delete', 'super-admin'])
-                <flux:button variant="filled" icon="trash" wire:click="purgeOldLogs" wire:confirm="{{ __('Purge logs older than 30 days?') }}" class="text-red-600 dark:text-red-400 hover:bg-red-500/10 cursor-pointer">
+                <flux:button variant="filled" icon="trash" x-on:click="Swal.fire({title: '{{ __('Purge logs older than 30 days?') }}', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#6b7280', confirmButtonText: '{{ __('Yes') }}', cancelButtonText: '{{ __('Cancel') }}'}).then(r => r.isConfirmed && $wire.purgeOldLogs())" class="text-red-600 dark:text-red-400 hover:bg-red-500/10 cursor-pointer">
                     {{ __('Purge Old Logs') }}
                 </flux:button>
             @endcanany

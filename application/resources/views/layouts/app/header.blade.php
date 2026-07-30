@@ -22,6 +22,9 @@
                     <flux:navbar.item class="!h-10 [&>div>svg]:size-5" icon="magnifying-glass" href="#" :label="__('Search')" />
                 </flux:tooltip>
 
+                @auth
+                    @livewire('notification-bell')
+                @endauth
             </flux:navbar>
 
             <x-desktop-user-menu />

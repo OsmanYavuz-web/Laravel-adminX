@@ -21,6 +21,7 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
     public ?array $selectedMedia = null;
     public bool $showUploadModal = false;
     public bool $showDetailModal = false;
+    public array $selectedFilePaths = [];
 
     // Share Modal States
     public bool $showShareModal = false;
@@ -169,6 +170,57 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
         }
     }
 
+    public function deleteSelectedFiles(): void
+    {
+        abort_unless(auth()->user()->can('media.delete') || auth()->user()->hasRole('super-admin'), 403);
+
+        $disk = Storage::disk('local');
+        $count = 0;
+
+        foreach ($this->selectedFilePaths as $path) {
+            if ($disk->exists($path)) {
+                $filename = basename($path);
+                $disk->delete($path);
+                MediaShare::where('file_path', $path)->delete();
+                $count++;
+            }
+        }
+
+        \App\Models\ActivityLog::record(
+            event: 'media_deleted',
+            description: __(':count files deleted from Media Library.', ['count' => $count])
+        );
+
+        $this->selectedFilePaths = [];
+        $this->selectedMedia = null;
+        $this->showDetailModal = false;
+        $this->showShareModal = false;
+
+        Flux::toast(variant: 'success', text: __(':count files deleted successfully.', ['count' => $count]));
+    }
+
+    public function downloadSelectedFiles()
+    {
+        $disk = Storage::disk('local');
+        $zipPath = storage_path('app/temp_download_' . uniqid() . '.zip');
+        $zip = new \ZipArchive();
+
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
+            foreach ($this->selectedFilePaths as $path) {
+                if ($disk->exists($path)) {
+                    $zip->addFile($disk->path($path), basename($path));
+                }
+            }
+            $zip->close();
+
+            $this->selectedFilePaths = [];
+
+            return response()->download($zipPath)->deleteFileAfterSend(true);
+        }
+
+        Flux::toast(variant: 'danger', text: __('Could not create download archive.'));
+    }
+
     public function viewDetails(array $media): void
     {
         $this->selectedMedia = $media;
@@ -220,6 +272,7 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
     {
         $disk = Storage::disk('local');
         $files = $disk->exists('media') ? $disk->files('media') : [];
+        $allMedia = [];
         $mediaList = [];
 
         foreach ($files as $file) {
@@ -229,7 +282,6 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
             $lastModified = $disk->lastModified($file);
             $url = route('media.file', ['filename' => $filename]);
 
-            // Determine media category
             $category = 'other';
             if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
                 $category = 'image';
@@ -239,17 +291,7 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
                 $category = 'archive';
             }
 
-            // Search filter
-            if (!empty($this->search) && !str_contains(strtolower($filename), strtolower($this->search))) {
-                continue;
-            }
-
-            // Category filter
-            if ($this->typeFilter !== 'all' && $category !== $this->typeFilter) {
-                continue;
-            }
-
-            $mediaList[] = [
+            $entry = [
                 'filename' => $filename,
                 'path' => $file,
                 'url' => $url,
@@ -259,6 +301,18 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
                 'category' => $category,
                 'created_at' => $lastModified,
             ];
+
+            $allMedia[] = $entry;
+
+            // Apply search & type filter
+            if (!empty($this->search) && !str_contains(strtolower($filename), strtolower($this->search))) {
+                continue;
+            }
+            if ($this->typeFilter !== 'all' && $category !== $this->typeFilter) {
+                continue;
+            }
+
+            $mediaList[] = $entry;
         }
 
         // Sort latest first
@@ -274,10 +328,10 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
 
         return [
             'mediaItems' => $mediaList,
-            'totalCount' => count($mediaList),
-            'imageCount' => count(array_filter($mediaList, fn($m) => $m['category'] === 'image')),
-            'documentCount' => count(array_filter($mediaList, fn($m) => $m['category'] === 'document')),
-            'archiveCount' => count(array_filter($mediaList, fn($m) => $m['category'] === 'archive')),
+            'totalCount' => count($allMedia),
+            'imageCount' => count(array_filter($allMedia, fn($m) => $m['category'] === 'image')),
+            'documentCount' => count(array_filter($allMedia, fn($m) => $m['category'] === 'document')),
+            'archiveCount' => count(array_filter($allMedia, fn($m) => $m['category'] === 'archive')),
             'activeShares' => $activeShares,
             'maxUploadSize' => $uploadSettings['maxSize'],
             'allowedTypes' => $uploadSettings['allowedTypes'],
@@ -364,10 +418,31 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
             </div>
         </div>
 
+        {{-- Bulk Action Bar --}}
+        <div class="flex items-center justify-between" x-data>
+            <div class="flex items-center gap-3">
+                @canany(['media.delete', 'super-admin'])
+                    <button type="button" x-on:click="Swal.fire({ title: '{{ __('Are you sure you want to delete the selected files?') }}', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#6b7280', confirmButtonText: '{{ __('Yes') }}', cancelButtonText: '{{ __('Cancel') }}' }).then(r => r.isConfirmed && $wire.deleteSelectedFiles())" class="px-3 py-1.5 rounded-lg text-xs font-bold text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer flex items-center gap-1.5" x-show="$wire.selectedFilePaths.length > 0">
+                        <flux:icon icon="trash" class="size-3.5" />
+                        <span x-text="'{{ __('Delete Selected') }} (' + $wire.selectedFilePaths.length + ')'"></span>
+                    </button>
+                @endcanany
+                <button type="button" wire:click="downloadSelectedFiles" class="px-3 py-1.5 rounded-lg text-xs font-bold text-brand hover:bg-brand/10 transition-colors cursor-pointer flex items-center gap-1.5" x-show="$wire.selectedFilePaths.length > 0">
+                    <flux:icon icon="arrow-down-tray" class="size-3.5" />
+                    <span x-text="'{{ __('Download Selected') }} (' + $wire.selectedFilePaths.length + ')'"></span>
+                </button>
+            </div>
+        </div>
+
         {{-- Media Grid --}}
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             @forelse($mediaItems as $media)
-                <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-xs hover:border-brand/40 transition-all group flex flex-col justify-between">
+                <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-xs hover:border-brand/40 transition-all group flex flex-col justify-between relative">
+                    {{-- Select Checkbox --}}
+                    <div class="absolute top-2 right-2 z-10" @click.stop>
+                        <input type="checkbox" value="{{ $media['path'] }}" wire:model.live="selectedFilePaths" class="rounded border-zinc-300 dark:border-zinc-700 text-brand focus:ring-brand cursor-pointer" />
+                    </div>
+
                     {{-- Thumbnail / File Icon Area (Clickable to open modal) --}}
                     <div
                         wire:click="viewDetails({{ json_encode($media) }})"
@@ -438,7 +513,7 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
 
                                 {{-- Delete --}}
                                 @canany(['media.delete', 'super-admin'])
-                                    <button type="button" wire:click="deleteFile('{{ $media['filename'] }}')" wire:confirm="{{ __('Are you sure you want to delete this file?') }}" title="{{ __('Delete') }}" class="p-1 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer">
+                                    <button type="button" x-on:click="Swal.fire({ title: '{{ __('Are you sure you want to delete this file?') }}', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#6b7280', confirmButtonText: '{{ __('Yes') }}', cancelButtonText: '{{ __('Cancel') }}' }).then(r => r.isConfirmed && $wire.deleteFile('{{ $media['filename'] }}'))" title="{{ __('Delete') }}" class="p-1 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer">
                                         <flux:icon icon="trash" class="size-3.5" />
                                     </button>
                                 @endcanany
@@ -741,9 +816,31 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
                     </div>
 
                     {{-- Dynamic Preview Display --}}
-                    <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-950 overflow-hidden flex items-center justify-center min-h-[350px] max-h-[550px] relative">
-                        @if($selectedMedia['category'] === 'image')
-                            <img src="{{ $selectedMedia['url'] }}" alt="{{ $selectedMedia['filename'] }}" class="max-h-[550px] w-auto object-contain" />
+                    <div x-data="{ zoom: false }" class="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-950 overflow-hidden flex items-center justify-center min-h-[350px] max-h-[550px] relative">
+                        @if(in_array($selectedMedia['ext'], ['mp4', 'webm', 'ogg', 'mov']))
+                            <video controls class="max-h-[550px] w-auto max-w-full" autoplay>
+                                <source src="{{ $selectedMedia['url'] }}" type="video/{{ $selectedMedia['ext'] === 'mov' ? 'quicktime' : $selectedMedia['ext'] }}">
+                            </video>
+                        @elseif(in_array($selectedMedia['ext'], ['mp3', 'wav', 'ogg', 'aac', 'flac']))
+                            <div class="flex flex-col items-center gap-6 p-12 text-center w-full max-w-md">
+                                <div class="flex h-24 w-24 items-center justify-center rounded-full bg-brand/20 text-brand">
+                                    <flux:icon icon="musical-note" class="size-12" />
+                                </div>
+                                <div class="w-full space-y-1">
+                                    <div class="font-bold text-white text-base truncate">{{ $selectedMedia['filename'] }}</div>
+                                    <div class="text-xs text-zinc-500">{{ $selectedMedia['formatted_size'] }}</div>
+                                </div>
+                                <audio controls class="w-full">
+                                    <source src="{{ $selectedMedia['url'] }}" type="audio/{{ $selectedMedia['ext'] === 'mp3' ? 'mpeg' : $selectedMedia['ext'] }}">
+                                </audio>
+                            </div>
+                        @elseif($selectedMedia['category'] === 'image')
+                            <div class="relative cursor-zoom-in" @click="zoom = !zoom">
+                                <img src="{{ $selectedMedia['url'] }}" alt="{{ $selectedMedia['filename'] }}"
+                                    class="max-h-[550px] w-auto object-contain transition-transform duration-200"
+                                    :class="zoom ? 'scale-150 max-h-none cursor-zoom-out' : ''"
+                                />
+                            </div>
                         @elseif($selectedMedia['ext'] === 'pdf')
                             <iframe src="{{ $selectedMedia['url'] }}" class="w-full h-[500px] border-0"></iframe>
                         @else
@@ -780,7 +877,7 @@ new #[Title('Media Library')] #[Layout('layouts.app')] class extends Component {
 
                     <div class="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800">
                         @canany(['media.delete', 'super-admin'])
-                            <flux:button variant="ghost" icon="trash" class="text-red-500 hover:bg-red-500/10 hover:text-red-600 cursor-pointer" wire:click="deleteFile('{{ $selectedMedia['filename'] }}')" wire:confirm="{{ __('Are you sure you want to delete this file?') }}">
+                            <flux:button variant="ghost" icon="trash" class="text-red-500 hover:bg-red-500/10 hover:text-red-600 cursor-pointer" x-on:click="Swal.fire({ title: '{{ __('Are you sure you want to delete this file?') }}', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#6b7280', confirmButtonText: '{{ __('Yes') }}', cancelButtonText: '{{ __('Cancel') }}' }).then(r => r.isConfirmed && $wire.deleteFile('{{ $selectedMedia['filename'] }}'))">
                                 {{ __('Delete File') }}
                             </flux:button>
                         @else

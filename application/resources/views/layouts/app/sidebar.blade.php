@@ -51,7 +51,7 @@
 
                 {{-- 2. SİSTEM MENÜSÜ (ALTTA) --}}
                 @canany(['media.view', 'users.view', 'roles.view', 'logs.view', 'backups.view'])
-                    <div x-data="{ open: {{ request()->routeIs('media.*', 'users.*', 'roles.*', 'settings.logs', 'settings.backups') ? 'true' : 'false' }} }" class="space-y-1 pt-1">
+                    <div x-data="{ open: {{ request()->routeIs('media.*', 'users.*', 'roles.*', 'settings.logs', 'settings.backups', 'settings.system-info') ? 'true' : 'false' }} }" class="space-y-1 pt-1">
                         <button @click="open = !open" type="button" class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 transition-colors cursor-pointer">
                             <div class="flex items-center gap-2.5">
                                 <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/15 text-brand dark:text-brand-accent shadow-2xs">
@@ -86,6 +86,11 @@
                             @can('backups.view')
                                 <flux:sidebar.item icon="archive-box" :href="route('settings.backups')" :current="request()->routeIs('settings.backups')" wire:navigate>
                                     {{ __('Backups Management') }}
+                                </flux:sidebar.item>
+                            @endcan
+                            @can('settings.view')
+                                <flux:sidebar.item icon="server-stack" :href="route('settings.system-info')" :current="request()->routeIs('settings.system-info')" wire:navigate>
+                                    {{ __('System Information') }}
                                 </flux:sidebar.item>
                             @endcan
                         </div>
@@ -168,5 +173,30 @@
         @endpersist
 
         @fluxScripts
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            const isDark = document.documentElement.classList.contains('dark');
+            const brand = getComputedStyle(document.documentElement).getPropertyValue('--theme-brand').trim() || '#059669';
+
+            const swalDefaults = {
+                background: isDark ? '#27272a' : '#ffffff',
+                color: isDark ? '#e4e4e7' : '#18181b',
+                confirmButtonColor: brand,
+                cancelButtonColor: isDark ? '#3f3f46' : '#f4f4f5',
+                reverseButtons: true,
+            };
+
+            const _origFire = Swal.fire.bind(Swal);
+            Swal.fire = function (opts) {
+                if (typeof opts === 'string') return _origFire(opts);
+                return _origFire({ ...swalDefaults, ...opts });
+            };
+
+            document.addEventListener('livewire:init', () => {
+                Livewire.on('swal', (data) => Swal.fire(data[0]));
+                Livewire.on('swal-toast', (data) => Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true, icon: 'success', background: isDark ? '#27272a' : '#ffffff', color: isDark ? '#e4e4e7' : '#18181b', ...data[0] }));
+            });
+        </script>
     </body>
 </html>

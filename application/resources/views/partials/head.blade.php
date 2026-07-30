@@ -32,6 +32,21 @@
         $colors = $palettes[$themeColor] ?? $palettes['emerald'];
     }
 @endphp
+<style>
+    .swal2-popup { border-radius: 12px; font-family: inherit; }
+    .swal2-title { font-size: 1.125rem; font-weight: 700; padding: 0 0 0.25rem; }
+    .swal2-actions { margin-top: 1rem; gap: 0.5rem; }
+    .swal2-icon { border-color: var(--theme-brand); color: var(--theme-brand); }
+    .swal2-icon-content { color: var(--theme-brand); }
+    .swal2-warning { border-color: var(--theme-brand); }
+    .swal2-styled.swal2-cancel { background-color: #f4f4f5 !important; color: #27272a !important; border: 1px solid #e4e4e7 !important; font-weight: 500; box-shadow: none !important; }
+    .dark .swal2-styled.swal2-cancel { background-color: #3f3f46 !important; color: #e4e4e7 !important; border-color: #52525b !important; }
+</style>
+<style>
+    [data-flux-modal] > dialog::backdrop { background: rgba(0,0,0,0.55) !important; }
+    .dark [data-flux-modal] > dialog::backdrop { background: rgba(0,0,0,0.75) !important; }
+    input[type="checkbox"] { accent-color: var(--theme-brand); width: 1.1rem; height: 1.1rem; cursor: pointer; }
+</style>
 <style id="system-theme-style">
     :root {
         --theme-brand: {{ $colors['brand'] }};

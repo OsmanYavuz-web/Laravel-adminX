@@ -121,17 +121,22 @@ class BackupService
         $zip = new ZipArchive();
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
             $dbConnection = config('database.default');
+            $dbPath = config('database.connections.' . $dbConnection . '.database');
 
-            if ($dbConnection === 'sqlite') {
-                $dbPath = config('database.connections.sqlite.database');
-                if (File::exists($dbPath)) {
+            if (File::exists($dbPath)) {
+                if ($dbConnection === 'sqlite') {
                     $zip->addFile($dbPath, 'database.sqlite');
+                } else {
+                    $tempSql = storage_path('app/temp_dump_' . uniqid() . '.sql');
+                    try {
+                        $this->runDatabaseDump($dbConnection, $tempSql);
+                        $zip->addFile($tempSql, 'database_dump.sql');
+                    } finally {
+                        if (File::exists($tempSql)) {
+                            File::delete($tempSql);
+                        }
+                    }
                 }
-            } else {
-                // Export SQLite or fallback DB file
-                $tempSql = storage_path('app/temp_dump.sql');
-                File::put($tempSql, "-- Database Dump\n-- Generated on " . now());
-                $zip->addFile($tempSql, 'database_dump.sql');
             }
 
             $zip->close();
@@ -181,6 +186,48 @@ class BackupService
             }
 
             $zip->close();
+        }
+    }
+
+    /**
+     * Run a database dump to a temp file.
+     */
+    protected function runDatabaseDump(string $connection, string $outputPath): void
+    {
+        $db = \Illuminate\Support\Facades\DB::connection($connection);
+        $pdo = $db->getPdo();
+        $driver = $db->getDriverName();
+
+        if ($driver === 'mysql') {
+            $dump = '';
+            $tables = $pdo->query('SHOW TABLES')->fetchAll(\PDO::FETCH_COLUMN);
+            foreach ($tables as $table) {
+                $create = $pdo->query("SHOW CREATE TABLE `{$table}`")->fetch(\PDO::FETCH_ASSOC);
+                $dump .= "--\n-- Table: {$table}\n--\n\n";
+                $dump .= $create['Create Table'] . ";\n\n";
+                $rows = $pdo->query("SELECT * FROM `{$table}`")->fetchAll(\PDO::FETCH_ASSOC);
+                foreach ($rows as $row) {
+                    $cols = array_map(fn($v) => is_null($v) ? 'NULL' : $pdo->quote($v), array_values($row));
+                    $dump .= "INSERT INTO `{$table}` VALUES (" . implode(', ', $cols) . ");\n";
+                }
+                $dump .= "\n";
+            }
+            File::put($outputPath, $dump);
+        } elseif ($driver === 'pgsql') {
+            $dump = '';
+            $tables = $pdo->query("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")->fetchAll(\PDO::FETCH_COLUMN);
+            foreach ($tables as $table) {
+                $dump .= "--\n-- Table: {$table}\n--\n\n";
+                $rows = $pdo->query("SELECT * FROM \"{$table}\"")->fetchAll(\PDO::FETCH_ASSOC);
+                foreach ($rows as $row) {
+                    $cols = array_map(fn($v) => is_null($v) ? 'NULL' : $pdo->quote($v), array_values($row));
+                    $dump .= "INSERT INTO \"{$table}\" VALUES (" . implode(', ', $cols) . ");\n";
+                }
+                $dump .= "\n";
+            }
+            File::put($outputPath, $dump);
+        } else {
+            File::put($outputPath, "-- Database dump not supported for driver: {$driver}");
         }
     }
 
