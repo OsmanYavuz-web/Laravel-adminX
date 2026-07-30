@@ -4,13 +4,13 @@
         <span x-show="$wire.unreadCount > 0" class="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none" x-text="$wire.unreadCount"></span>
     </button>
 
-    <div x-show="open" @click.outside="open = false" class="absolute end-0 top-full mt-2 z-50 w-80 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl overflow-hidden">
-        <div class="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-800">
+    <div x-show="open" @click.outside="open = false" class="fixed top-3 right-3 z-50 w-80 max-h-[calc(100vh-1.5rem)] rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl overflow-hidden flex flex-col">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
             <span class="text-sm font-bold text-zinc-900 dark:text-white">{{ __('Notifications') }}</span>
             <button x-show="$wire.unreadCount > 0" type="button" wire:click="markAllAsRead" class="text-xs font-bold text-brand hover:underline cursor-pointer">{{ __('Mark all as read') }}</button>
         </div>
 
-        <div class="max-h-80 overflow-y-auto divide-y divide-zinc-100 dark:divide-zinc-800">
+        <div class="overflow-y-auto divide-y divide-zinc-100 dark:divide-zinc-800">
             <template x-for="notif in $wire.notifications" :key="notif.id">
                 <div class="flex items-start gap-3 px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors" :class="{'bg-brand/5': !notif.read_at}">
                     <div class="shrink-0 mt-0.5">

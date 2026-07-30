@@ -7,7 +7,12 @@
         <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
-                <flux:sidebar.collapse class="lg:hidden" />
+                <div class="flex items-center gap-1">
+                    @auth
+                        @livewire('notification-bell')
+                    @endauth
+                    <flux:sidebar.collapse class="lg:hidden" />
+                </div>
             </flux:sidebar.header>
 
             <flux:sidebar.nav class="space-y-1">
@@ -108,6 +113,10 @@
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />
+
+            @auth
+                @livewire('notification-bell')
+            @endauth
 
             <flux:dropdown position="top" align="end">
                 <flux:profile

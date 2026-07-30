@@ -25,6 +25,8 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
+        app('livewire')->component('notification-bell', \App\Livewire\NotificationBell::class);
+
         // Implicitly grant 'super-admin' role all permissions
         \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
             return $user->hasRole('super-admin') ? true : null;
