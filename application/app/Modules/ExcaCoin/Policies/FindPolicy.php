@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Policies;
+namespace App\Modules\ExcaCoin\Policies;
 
-use App\Models\Find;
 use App\Models\User;
+use App\Modules\ExcaCoin\Models\Find;
 
 class FindPolicy
 {

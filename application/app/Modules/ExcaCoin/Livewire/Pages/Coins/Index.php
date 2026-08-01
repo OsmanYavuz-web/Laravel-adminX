@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Livewire\Pages\Coins;
+namespace App\Modules\ExcaCoin\Livewire\Pages\Coins;
 
-use App\Models\Coin;
-use App\Models\Dictionary;
-use App\Models\ExcavationProject;
-use App\Models\Find;
+use App\Modules\ExcaCoin\Models\Coin;
+use App\Modules\ExcaCoin\Models\Dictionary;
+use App\Modules\ExcaCoin\Models\ExcavationProject;
+use App\Modules\ExcaCoin\Models\Find;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -16,13 +17,18 @@ class Index extends Component
     use WithPagination;
 
     public ?ExcavationProject $project = null;
+
     public ?Find $find = null;
 
     #[Url(as: 'q')]
     public string $search = '';
+
     public string $filterPeriod = '';
-    public string $filterMetal  = '';
-    public string $filterMint   = '';
+
+    public string $filterMetal = '';
+
+    public string $filterMint = '';
+
     public string $viewMode = 'grid'; // grid | table
 
     public ?int $deletingId = null;
@@ -42,9 +48,9 @@ class Index extends Component
             ->with(['project', 'find', 'period', 'metal', 'mint', 'denomination'])
             ->when($this->search, fn ($q) => $q->where(function ($q) {
                 $q->where('reference', 'like', "%{$this->search}%")
-                  ->orWhere('note', 'like', "%{$this->search}%")
-                  ->orWhere('obverse_legend', 'like', "%{$this->search}%")
-                  ->orWhere('reverse_legend', 'like', "%{$this->search}%");
+                    ->orWhere('note', 'like', "%{$this->search}%")
+                    ->orWhere('obverse_legend', 'like', "%{$this->search}%")
+                    ->orWhere('reverse_legend', 'like', "%{$this->search}%");
             }))
             ->when($this->filterPeriod, fn ($q) => $q->where('period_id', $this->filterPeriod))
             ->when($this->filterMetal, fn ($q) => $q->where('metal_id', $this->filterMetal))
@@ -54,27 +60,42 @@ class Index extends Component
     }
 
     #[Computed]
-    public function periods(): \Illuminate\Support\Collection
+    public function periods(): Collection
     {
         return Dictionary::ofType('period')->get();
     }
 
     #[Computed]
-    public function metals(): \Illuminate\Support\Collection
+    public function metals(): Collection
     {
         return Dictionary::ofType('metal')->get();
     }
 
     #[Computed]
-    public function mints(): \Illuminate\Support\Collection
+    public function mints(): Collection
     {
         return Dictionary::ofType('mint')->get();
     }
 
-    public function updatedSearch(): void { $this->resetPage(); }
-    public function updatedFilterPeriod(): void { $this->resetPage(); }
-    public function updatedFilterMetal(): void { $this->resetPage(); }
-    public function updatedFilterMint(): void { $this->resetPage(); }
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterPeriod(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterMetal(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterMint(): void
+    {
+        $this->resetPage();
+    }
 
     public function setViewMode(string $mode): void
     {
@@ -92,7 +113,9 @@ class Index extends Component
 
     public function delete(): void
     {
-        if (! $this->deletingId) return;
+        if (! $this->deletingId) {
+            return;
+        }
         $coin = Coin::findOrFail($this->deletingId);
         $coin->clearMediaCollection('obverse');
         $coin->clearMediaCollection('reverse');
@@ -106,8 +129,9 @@ class Index extends Component
 
     public function render()
     {
-        $title = __('Sikkeler') . ($this->find && $this->find->exists ? ' — ' . $this->find->inventory_number : '');
-        return view('pages.coins.index')
+        $title = __('Sikkeler').($this->find && $this->find->exists ? ' — '.$this->find->inventory_number : '');
+
+        return view('exca-coin::pages.coins.index')
             ->layout('layouts.app', ['title' => $title]);
     }
 }

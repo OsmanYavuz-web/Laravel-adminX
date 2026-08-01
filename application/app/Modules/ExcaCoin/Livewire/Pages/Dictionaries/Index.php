@@ -1,30 +1,34 @@
 <?php
 
-namespace App\Livewire\Pages\Dictionaries;
+namespace App\Modules\ExcaCoin\Livewire\Pages\Dictionaries;
 
-use App\Models\Dictionary;
 use App\Models\Language;
+use App\Modules\ExcaCoin\Models\Coin;
+use App\Modules\ExcaCoin\Models\Dictionary;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\On;
 use Livewire\Component;
 
 class Index extends Component
 {
-
     // Seçili tip
     public string $activeType = 'period';
 
     // Modal kontrolleri
-    public bool $showFormModal   = false;
+    public bool $showFormModal = false;
+
     public bool $showDeleteModal = false;
 
     // Form alanları
-    public ?int  $editingId = null;
-    public array $formName  = [];
+    public ?int $editingId = null;
+
+    public array $formName = [];
+
     public string $formCode = '';
-    public int   $formSort  = 0;
-    public bool  $formActive = true;
+
+    public int $formSort = 0;
+
+    public bool $formActive = true;
 
     // Sil onay
     public ?int $deletingId = null;
@@ -41,9 +45,9 @@ class Index extends Component
 
         return [
             "formName.{$defaultLang}" => 'required|string|max:150',
-            'formCode'                => 'nullable|string|max:20',
-            'formSort'                => 'integer|min:0',
-            'formActive'              => 'boolean',
+            'formCode' => 'nullable|string|max:20',
+            'formSort' => 'integer|min:0',
+            'formActive' => 'boolean',
         ];
     }
 
@@ -93,16 +97,16 @@ class Index extends Component
     public function edit(int $id): void
     {
         $item = Dictionary::findOrFail($id);
-        $this->editingId  = $id;
-        
+        $this->editingId = $id;
+
         $languages = Language::getActive();
         $this->formName = [];
         foreach ($languages as $lang) {
             $this->formName[$lang['code']] = $item->getTranslation('name', $lang['code'], false) ?: '';
         }
 
-        $this->formCode   = $item->code ?? '';
-        $this->formSort   = $item->sort_order;
+        $this->formCode = $item->code ?? '';
+        $this->formSort = $item->sort_order;
         $this->formActive = $item->is_active;
         $this->showFormModal = true;
     }
@@ -112,11 +116,11 @@ class Index extends Component
         $this->validate();
 
         $data = [
-            'type'       => $this->activeType,
-            'code'       => $this->formCode ?: null,
-            'name'       => array_filter($this->formName),
+            'type' => $this->activeType,
+            'code' => $this->formCode ?: null,
+            'name' => array_filter($this->formName),
             'sort_order' => $this->formSort,
-            'is_active'  => $this->formActive,
+            'is_active' => $this->formActive,
         ];
 
         if ($this->editingId) {
@@ -154,11 +158,12 @@ class Index extends Component
         $item = Dictionary::findOrFail($this->deletingId);
 
         // Kullanımda mı kontrol et
-        $usedInCoins = \App\Models\Coin::where("{$this->activeType}_id", $this->deletingId)->exists();
+        $usedInCoins = Coin::where("{$this->activeType}_id", $this->deletingId)->exists();
         if ($usedInCoins) {
             $this->dispatch('toast', message: __('Bu kayıt sikke tanımlarında kullanılıyor, silinemez.'), type: 'danger');
             $this->showDeleteModal = false;
             $this->deletingId = null;
+
             return;
         }
 
@@ -181,15 +186,15 @@ class Index extends Component
     {
         $this->editingId = null;
         $this->initLanguages();
-        $this->formCode   = '';
-        $this->formSort   = 0;
+        $this->formCode = '';
+        $this->formSort = 0;
         $this->formActive = true;
         $this->resetValidation();
     }
 
     public function render()
     {
-        return view('pages.dictionaries.index')
+        return view('exca-coin::pages.dictionaries.index')
             ->layout('layouts.app', ['title' => __('Sözlükler')]);
     }
 }

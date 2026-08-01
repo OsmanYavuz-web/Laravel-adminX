@@ -21,7 +21,7 @@
     @php
         $activeProject = ($find && $find->exists) ? $find->project : ($project && $project->exists ? $project : null);
         if (!$activeProject && isset($findId) && $findId) {
-            $fObj = \App\Models\Find::with('project')->find($findId);
+            $fObj = \App\Modules\ExcaCoin\Models\Find::with('project')->find($findId);
             $activeProject = $fObj?->project;
         }
         $tabFieldMap = [
@@ -63,7 +63,7 @@
         @php
             $activeProject = ($find && $find->exists) ? $find->project : ($project && $project->exists ? $project : null);
             if (!$activeProject && isset($findId) && $findId) {
-                $fObj = \App\Models\Find::with('project')->find($findId);
+                $fObj = \App\Modules\ExcaCoin\Models\Find::with('project')->find($findId);
                 $activeProject = $fObj?->project;
             }
         @endphp
@@ -81,7 +81,7 @@
                         </flux:label>
                         <flux:select wire:model.live="findId" x-searchable required>
                             <flux:select.option value="">— {{ __('Buluntu Seçin...') }} —</flux:select.option>
-                            @foreach(\App\Models\Find::query()->whereHas('project', fn($q) => $q->accessibleBy())->with('project')->get() as $f)
+                            @foreach(\App\Modules\ExcaCoin\Models\Find::query()->whereHas('project', fn($q) => $q->accessibleBy())->with('project')->get() as $f)
                                 <flux:select.option value="{{ $f->id }}">
                                     {{ $f->inventory_number }} ({{ $f->project->name }} — {{ $f->excavation_area }})
                                 </flux:select.option>
@@ -104,7 +104,7 @@
                             </flux:select>
                         </div>
                         @can('dictionaries.create')
-                            <livewire:components.quick-add-dictionary type="period" modalName="quick-add-period" wire:key="qad-period" />
+                            <livewire:exca-coin.components.quick-add-dictionary type="period" modalName="quick-add-period" wire:key="qad-period" />
                         @endcan
                     </div>
                 @endif
@@ -121,7 +121,7 @@
                             </flux:select>
                         </div>
                         @can('dictionaries.create')
-                            <livewire:components.quick-add-dictionary type="authority" modalName="quick-add-authority" wire:key="qad-authority" />
+                            <livewire:exca-coin.components.quick-add-dictionary type="authority" modalName="quick-add-authority" wire:key="qad-authority" />
                         @endcan
                     </div>
                 @endif
@@ -138,7 +138,7 @@
                             </flux:select>
                         </div>
                         @can('dictionaries.create')
-                            <livewire:components.quick-add-dictionary type="ruler" modalName="quick-add-ruler" wire:key="qad-ruler" />
+                            <livewire:exca-coin.components.quick-add-dictionary type="ruler" modalName="quick-add-ruler" wire:key="qad-ruler" />
                         @endcan
                     </div>
                 @endif
@@ -155,7 +155,7 @@
                             </flux:select>
                         </div>
                         @can('dictionaries.create')
-                            <livewire:components.quick-add-dictionary type="region" modalName="quick-add-region" wire:key="qad-region" />
+                            <livewire:exca-coin.components.quick-add-dictionary type="region" modalName="quick-add-region" wire:key="qad-region" />
                         @endcan
                     </div>
                 @endif
@@ -172,7 +172,7 @@
                             </flux:select>
                         </div>
                         @can('dictionaries.create')
-                            <livewire:components.quick-add-dictionary type="mint" modalName="quick-add-mint" wire:key="qad-mint" />
+                            <livewire:exca-coin.components.quick-add-dictionary type="mint" modalName="quick-add-mint" wire:key="qad-mint" />
                         @endcan
                     </div>
                 @endif
@@ -209,7 +209,7 @@
                             </flux:select>
                         </div>
                         @can('dictionaries.create')
-                            <livewire:components.quick-add-dictionary type="metal" modalName="quick-add-metal" wire:key="qad-metal" />
+                            <livewire:exca-coin.components.quick-add-dictionary type="metal" modalName="quick-add-metal" wire:key="qad-metal" />
                         @endcan
                     </div>
                 @endif
@@ -249,7 +249,7 @@
                             </flux:select>
                         </div>
                         @can('dictionaries.create')
-                            <livewire:components.quick-add-dictionary type="denomination" modalName="quick-add-denomination" wire:key="qad-denomination" />
+                            <livewire:exca-coin.components.quick-add-dictionary type="denomination" modalName="quick-add-denomination" wire:key="qad-denomination" />
                         @endcan
                     </div>
                 @endif

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Policies;
+namespace App\Modules\ExcaCoin\Policies;
 
-use App\Models\Coin;
 use App\Models\User;
+use App\Modules\ExcaCoin\Models\Coin;
 
 class CoinPolicy
 {

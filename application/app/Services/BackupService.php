@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
-use ZipArchive;
 use App\Models\ActivityLog;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use ZipArchive;
 
 class BackupService
 {
@@ -17,7 +18,7 @@ class BackupService
     public function createBackup(string $type = 'full'): string
     {
         $disk = Storage::disk('local');
-        if (!$disk->exists($this->backupDir)) {
+        if (! $disk->exists($this->backupDir)) {
             $disk->makeDirectory($this->backupDir);
         }
 
@@ -56,7 +57,7 @@ class BackupService
     public function listBackups(): array
     {
         $disk = Storage::disk('local');
-        if (!$disk->exists($this->backupDir)) {
+        if (! $disk->exists($this->backupDir)) {
             return [];
         }
 
@@ -67,7 +68,7 @@ class BackupService
             $filename = basename($file);
             $fullPath = $disk->path($file);
 
-            if (!File::exists($fullPath)) {
+            if (! File::exists($fullPath)) {
                 continue;
             }
 
@@ -87,7 +88,7 @@ class BackupService
             ];
         }
 
-        usort($backups, fn($a, $b) => $b['created_at'] <=> $a['created_at']);
+        usort($backups, fn ($a, $b) => $b['created_at'] <=> $a['created_at']);
 
         return $backups;
     }
@@ -107,6 +108,7 @@ class BackupService
                 description: "Yedek dosyası silindi: {$filename}",
                 properties: ['filename' => $filename]
             );
+
             return true;
         }
 
@@ -118,16 +120,16 @@ class BackupService
      */
     protected function createDatabaseZip(string $zipPath): void
     {
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
             $dbConnection = config('database.default');
-            $dbPath = config('database.connections.' . $dbConnection . '.database');
+            $dbPath = config('database.connections.'.$dbConnection.'.database');
 
             if (File::exists($dbPath)) {
                 if ($dbConnection === 'sqlite') {
                     $zip->addFile($dbPath, 'database.sqlite');
                 } else {
-                    $tempSql = storage_path('app/temp_dump_' . uniqid() . '.sql');
+                    $tempSql = storage_path('app/temp_dump_'.uniqid().'.sql');
                     try {
                         $this->runDatabaseDump($dbConnection, $tempSql);
                         $zip->addFile($tempSql, 'database_dump.sql');
@@ -148,13 +150,13 @@ class BackupService
      */
     protected function createFilesZip(string $zipPath): void
     {
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
             $privateMedia = storage_path('app/private/media');
             if (File::exists($privateMedia)) {
                 $files = File::allFiles($privateMedia);
                 foreach ($files as $file) {
-                    $relativePath = 'media/' . $file->getRelativePathname();
+                    $relativePath = 'media/'.$file->getRelativePathname();
                     $zip->addFile($file->getRealPath(), $relativePath);
                 }
             }
@@ -167,7 +169,7 @@ class BackupService
      */
     protected function createFullZip(string $zipPath): void
     {
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
             // Add database
             $dbPath = config('database.connections.sqlite.database');
@@ -180,7 +182,7 @@ class BackupService
             if (File::exists($privateMedia)) {
                 $files = File::allFiles($privateMedia);
                 foreach ($files as $file) {
-                    $relativePath = 'private/media/' . $file->getRelativePathname();
+                    $relativePath = 'private/media/'.$file->getRelativePathname();
                     $zip->addFile($file->getRealPath(), $relativePath);
                 }
             }
@@ -194,7 +196,7 @@ class BackupService
      */
     protected function runDatabaseDump(string $connection, string $outputPath): void
     {
-        $db = \Illuminate\Support\Facades\DB::connection($connection);
+        $db = DB::connection($connection);
         $pdo = $db->getPdo();
         $driver = $db->getDriverName();
 
@@ -204,11 +206,11 @@ class BackupService
             foreach ($tables as $table) {
                 $create = $pdo->query("SHOW CREATE TABLE `{$table}`")->fetch(\PDO::FETCH_ASSOC);
                 $dump .= "--\n-- Table: {$table}\n--\n\n";
-                $dump .= $create['Create Table'] . ";\n\n";
+                $dump .= $create['Create Table'].";\n\n";
                 $rows = $pdo->query("SELECT * FROM `{$table}`")->fetchAll(\PDO::FETCH_ASSOC);
                 foreach ($rows as $row) {
-                    $cols = array_map(fn($v) => is_null($v) ? 'NULL' : $pdo->quote($v), array_values($row));
-                    $dump .= "INSERT INTO `{$table}` VALUES (" . implode(', ', $cols) . ");\n";
+                    $cols = array_map(fn ($v) => is_null($v) ? 'NULL' : $pdo->quote($v), array_values($row));
+                    $dump .= "INSERT INTO `{$table}` VALUES (".implode(', ', $cols).");\n";
                 }
                 $dump .= "\n";
             }
@@ -220,8 +222,8 @@ class BackupService
                 $dump .= "--\n-- Table: {$table}\n--\n\n";
                 $rows = $pdo->query("SELECT * FROM \"{$table}\"")->fetchAll(\PDO::FETCH_ASSOC);
                 foreach ($rows as $row) {
-                    $cols = array_map(fn($v) => is_null($v) ? 'NULL' : $pdo->quote($v), array_values($row));
-                    $dump .= "INSERT INTO \"{$table}\" VALUES (" . implode(', ', $cols) . ");\n";
+                    $cols = array_map(fn ($v) => is_null($v) ? 'NULL' : $pdo->quote($v), array_values($row));
+                    $dump .= "INSERT INTO \"{$table}\" VALUES (".implode(', ', $cols).");\n";
                 }
                 $dump .= "\n";
             }
@@ -242,6 +244,6 @@ class BackupService
         $pow = min($pow, count($units) - 1);
         $bytes /= (1 << (10 * $pow));
 
-        return round($bytes, $precision) . ' ' . $units[$pow];
+        return round($bytes, $precision).' '.$units[$pow];
     }
 }

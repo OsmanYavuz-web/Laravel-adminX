@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
-use App\Traits\LogsActivity;
 
 class Language extends Model
 {
     use LogsActivity;
+
     protected $fillable = [
         'code',
         'name',
@@ -61,6 +62,7 @@ class Language extends Model
                 return $lang;
             }
         }
+
         return $active[0] ?? null;
     }
 
@@ -79,6 +81,7 @@ class Language extends Model
                 'code' => strtoupper($lang['code']),
             ];
         }
+
         return $result;
     }
 

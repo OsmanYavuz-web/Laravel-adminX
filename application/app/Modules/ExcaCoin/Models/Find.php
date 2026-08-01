@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Models;
+namespace App\Modules\ExcaCoin\Models;
 
+use App\Models\User;
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-
-use App\Traits\LogsActivity;
 
 class Find extends Model implements HasMedia
 {
@@ -53,8 +53,8 @@ class Find extends Model implements HasMedia
     protected function casts(): array
     {
         return [
-            'find_date'   => 'date',
-            'elevation'   => 'decimal:2',
+            'find_date' => 'date',
+            'elevation' => 'decimal:2',
             'coordinate_x' => 'decimal:4',
             'coordinate_y' => 'decimal:4',
             'coordinate_z' => 'decimal:4',

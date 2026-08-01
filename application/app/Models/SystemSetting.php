@@ -30,7 +30,8 @@ class SystemSetting extends Model
             $val = $settings[$key];
             // Decode JSON if applicable
             $json = json_decode($val, true);
-            return (json_last_error() === JSON_ERROR_NONE && !is_numeric($val)) ? $json : $val;
+
+            return (json_last_error() === JSON_ERROR_NONE && ! is_numeric($val)) ? $json : $val;
         }
 
         return $default;

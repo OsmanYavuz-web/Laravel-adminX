@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Dictionary;
+use App\Modules\ExcaCoin\Models\Dictionary;
 use Illuminate\Database\Seeder;
 
 class DictionarySeeder extends Seeder
@@ -25,10 +25,10 @@ class DictionarySeeder extends Seeder
             Dictionary::updateOrCreate(
                 ['type' => 'period', 'name->tr' => $p['tr']],
                 [
-                    'code'       => $p['code'],
-                    'name'       => ['tr' => $p['tr'], 'en' => $p['en']],
+                    'code' => $p['code'],
+                    'name' => ['tr' => $p['tr'], 'en' => $p['en']],
                     'sort_order' => $p['sort'],
-                    'is_active'  => true,
+                    'is_active' => true,
                 ]
             );
         }
@@ -47,9 +47,9 @@ class DictionarySeeder extends Seeder
             Dictionary::updateOrCreate(
                 ['type' => 'metal', 'code' => $m['code']],
                 [
-                    'name'       => ['tr' => $m['tr'], 'en' => $m['en']],
+                    'name' => ['tr' => $m['tr'], 'en' => $m['en']],
                     'sort_order' => $m['sort'],
-                    'is_active'  => true,
+                    'is_active' => true,
                 ]
             );
         }
@@ -75,10 +75,10 @@ class DictionarySeeder extends Seeder
             Dictionary::updateOrCreate(
                 ['type' => 'denomination', 'name->tr' => $d['tr']],
                 [
-                    'code'       => $d['code'],
-                    'name'       => ['tr' => $d['tr'], 'en' => $d['en']],
+                    'code' => $d['code'],
+                    'name' => ['tr' => $d['tr'], 'en' => $d['en']],
                     'sort_order' => $d['sort'],
-                    'is_active'  => true,
+                    'is_active' => true,
                 ]
             );
         }
@@ -87,7 +87,7 @@ class DictionarySeeder extends Seeder
         $authorities = [
             ['code' => 'ROM-EMP', 'tr' => 'Roma İmparatorluğu',   'en' => 'Roman Empire',       'sort' => 1],
             ['code' => 'MAC-KG',  'tr' => 'Makedonya Krallığı',   'en' => 'Kingdom of Macedon', 'sort' => 2],
-            ['code' => 'SEL-EMP', 'tr' => 'Seleukos İmparatorluğu','en' => 'Seleucid Empire',   'sort' => 3],
+            ['code' => 'SEL-EMP', 'tr' => 'Seleukos İmparatorluğu', 'en' => 'Seleucid Empire',   'sort' => 3],
             ['code' => 'ATT-KG',  'tr' => 'Attalos Krallığı',      'en' => 'Attalid Kingdom',    'sort' => 4],
             ['code' => 'BYZ-EMP', 'tr' => 'Bizans İmparatorluğu',  'en' => 'Byzantine Empire',   'sort' => 5],
         ];
@@ -96,10 +96,10 @@ class DictionarySeeder extends Seeder
             Dictionary::updateOrCreate(
                 ['type' => 'authority', 'name->tr' => $a['tr']],
                 [
-                    'code'       => $a['code'],
-                    'name'       => ['tr' => $a['tr'], 'en' => $a['en']],
+                    'code' => $a['code'],
+                    'name' => ['tr' => $a['tr'], 'en' => $a['en']],
                     'sort_order' => $a['sort'],
-                    'is_active'  => true,
+                    'is_active' => true,
                 ]
             );
         }
@@ -118,10 +118,10 @@ class DictionarySeeder extends Seeder
             Dictionary::updateOrCreate(
                 ['type' => 'ruler', 'name->tr' => $r['tr']],
                 [
-                    'code'       => $r['code'],
-                    'name'       => ['tr' => $r['tr'], 'en' => $r['en']],
+                    'code' => $r['code'],
+                    'name' => ['tr' => $r['tr'], 'en' => $r['en']],
                     'sort_order' => $r['sort'],
-                    'is_active'  => true,
+                    'is_active' => true,
                 ]
             );
         }
@@ -141,10 +141,10 @@ class DictionarySeeder extends Seeder
             Dictionary::updateOrCreate(
                 ['type' => 'region', 'name->tr' => $rg['tr']],
                 [
-                    'code'       => $rg['code'],
-                    'name'       => ['tr' => $rg['tr'], 'en' => $rg['en']],
+                    'code' => $rg['code'],
+                    'name' => ['tr' => $rg['tr'], 'en' => $rg['en']],
                     'sort_order' => $rg['sort'],
-                    'is_active'  => true,
+                    'is_active' => true,
                 ]
             );
         }
@@ -157,17 +157,17 @@ class DictionarySeeder extends Seeder
             ['code' => 'ROM',  'tr' => 'Roma',           'en' => 'Rome',           'sort' => 4],
             ['code' => 'ANT',  'tr' => 'Antiochia',      'en' => 'Antioch',        'sort' => 5],
             ['code' => 'CON',  'tr' => 'Constantinople', 'en' => 'Constantinople', 'sort' => 6],
-            ['code' => 'PERGM','tr' => 'Pergamum',       'en' => 'Pergamum',       'sort' => 7],
+            ['code' => 'PERGM', 'tr' => 'Pergamum',       'en' => 'Pergamum',       'sort' => 7],
         ];
 
         foreach ($mints as $mn) {
             Dictionary::updateOrCreate(
                 ['type' => 'mint', 'name->tr' => $mn['tr']],
                 [
-                    'code'       => $mn['code'],
-                    'name'       => ['tr' => $mn['tr'], 'en' => $mn['en']],
+                    'code' => $mn['code'],
+                    'name' => ['tr' => $mn['tr'], 'en' => $mn['en']],
                     'sort_order' => $mn['sort'],
-                    'is_active'  => true,
+                    'is_active' => true,
                 ]
             );
         }

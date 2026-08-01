@@ -1,1 +1,1 @@
-@include('pages.coins._form', ['coin' => $coin])
+@include('exca-coin::pages.coins._form', ['coin' => $coin])

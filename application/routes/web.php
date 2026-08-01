@@ -1,15 +1,14 @@
 <?php
 
+use App\Models\MediaShare;
 use Illuminate\Support\Facades\Route;
-
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Artisan;
 
 Route::view('/', 'welcome')->name('home');
 Route::livewire('/share/{token}', 'pages::media.share')->name('media.share.public');
 
 Route::get('/share/file/{token}/{filename}', function (string $token, string $filename) {
-    $share = \App\Models\MediaShare::where('share_token', $token)->firstOrFail();
+    $share = MediaShare::where('share_token', $token)->firstOrFail();
 
     if ($share->isExpired()) {
         abort(410);
@@ -35,6 +34,7 @@ Route::get('/locale/{lang}', function (string $lang) {
             auth()->user()->update(['locale' => $lang]);
         }
     }
+
     return redirect()->back();
 })->name('locale.switch');
 
@@ -48,49 +48,8 @@ if ($adminPrefix) {
     Route::redirect('/forgot-password', '/' . $adminPrefix . '/forgot-password');
 }
 
-Route::prefix($adminPrefix)->middleware(['auth', 'verified'])->group(function () {
-    Route::livewire('dashboard', 'pages::dashboard')->name('dashboard');
+// NOTE: All authenticated panel routes are registered by modules
+// (app/Modules/*/routes/web.php) inside the admin prefix with the
+// auth + verified middleware group. See ModuleServiceProvider.
 
-    // --- ExcaCoin ---
-    Route::get('quick-entry', \App\Livewire\Pages\QuickEntry\Index::class)->name('quick-entry.index');
-    Route::get('dictionaries', \App\Livewire\Pages\Dictionaries\Index::class)->name('dictionaries.index');
-    Route::get('excavation-projects', \App\Livewire\Pages\ExcavationProjects\Index::class)->name('excavation-projects.index');
-    Route::get('finds', \App\Livewire\Pages\Finds\Index::class)->name('all-finds.index');
-    Route::get('finds/create', \App\Livewire\Pages\Finds\Create::class)->name('all-finds.create');
-    Route::get('coins', \App\Livewire\Pages\Coins\Index::class)->name('all-coins.index');
-    Route::get('coins/create', \App\Livewire\Pages\Coins\Create::class)->name('all-coins.create');
-    Route::get('excavation-projects/{project}/finds', \App\Livewire\Pages\Finds\Index::class)->name('finds.index');
-    Route::get('excavation-projects/{project}/finds/create', \App\Livewire\Pages\Finds\Create::class)->name('finds.create');
-    Route::get('excavation-projects/{project}/finds/{find}/edit', \App\Livewire\Pages\Finds\Edit::class)->name('finds.edit');
-    Route::get('excavation-projects/{project}/finds/{find}/coins', \App\Livewire\Pages\Coins\Index::class)->name('coins.index');
-    Route::get('excavation-projects/{project}/finds/{find}/coins/create', \App\Livewire\Pages\Coins\Create::class)->name('coins.create');
-    Route::get('excavation-projects/{project}/finds/{find}/coins/{coin}/edit', \App\Livewire\Pages\Coins\Edit::class)->name('coins.edit');
-    Route::get('excavation-projects/{project}/finds/{find}/coins/{coin}', \App\Livewire\Pages\Coins\Show::class)->name('coins.show');
-
-    // --- Sistem ---
-    Route::livewire('users', 'pages::users.index')->name('users.index');
-    Route::livewire('roles', 'pages::roles.index')->name('roles.index');
-    Route::livewire('settings/system', 'pages::settings.system')->name('settings.system');
-    Route::livewire('settings/languages', 'pages::settings.languages')->name('settings.languages');
-    Route::livewire('settings/logs', 'pages::settings.logs')->name('settings.logs');
-    Route::livewire('settings/system-info', 'pages::settings.system-info')->name('settings.system-info');
-    Route::livewire('settings/backups', 'pages::settings.backups')->name('settings.backups');
-    Route::livewire('media', 'pages::media.index')->name('media.index');
-    Route::get('/media/file/{filename}', function (string $filename) {
-        abort_unless(auth()->user()->can('media.view') || auth()->user()->hasRole('super-admin'), 403);
-
-        $path = "media/{$filename}";
-        if (Storage::disk('local')->exists($path)) {
-            return response()->file(Storage::disk('local')->path($path));
-        }
-        abort(404);
-    })->name('media.file');
-    Route::post('settings/cache/clear-all', function () {
-        abort_unless(auth()->user()->can('settings.update') || auth()->user()->hasRole('super-admin'), 403);
-        Artisan::call('config:clear');
-        Artisan::call('route:clear');
-        return redirect()->back();
-    })->name('cache.clear-all');
-});
-
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';

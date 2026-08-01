@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Models\ActivityLog;
 
 class MediaController extends Controller
 {
@@ -37,7 +37,7 @@ class MediaController extends Controller
 
         $file = $request->file('file');
         $originalName = $file->getClientOriginalName();
-        $filename = Str::slug(pathinfo($originalName, PATHINFO_FILENAME)) . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $filename = Str::slug(pathinfo($originalName, PATHINFO_FILENAME)).'_'.time().'.'.$file->getClientOriginalExtension();
         $file->storeAs('media', $filename, 'local');
 
         ActivityLog::record(
@@ -54,7 +54,7 @@ class MediaController extends Controller
         $path = "media/{$filename}";
         $disk = Storage::disk('local');
 
-        if (!$disk->exists($path)) {
+        if (! $disk->exists($path)) {
             return response()->json(['message' => 'File not found.'], 404);
         }
 

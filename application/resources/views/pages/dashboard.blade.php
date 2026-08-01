@@ -3,10 +3,10 @@
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use App\Models\ExcavationProject;
-use App\Models\Find;
-use App\Models\Coin;
-use App\Models\Dictionary;
+use App\Modules\ExcaCoin\Models\ExcavationProject;
+use App\Modules\ExcaCoin\Models\Find;
+use App\Modules\ExcaCoin\Models\Coin;
+use App\Modules\ExcaCoin\Models\Dictionary;
 
 new #[Title('Dashboard')] #[Layout('layouts.app')] class extends Component {
     public function with(): array

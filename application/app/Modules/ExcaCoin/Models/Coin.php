@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Models;
+namespace App\Modules\ExcaCoin\Models;
 
+use App\Models\User;
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-
-use App\Traits\LogsActivity;
 
 class Coin extends Model implements HasMedia
 {
@@ -56,11 +56,11 @@ class Coin extends Model implements HasMedia
     protected function casts(): array
     {
         return [
-            'diameter'     => 'decimal:2',
-            'weight'       => 'decimal:3',
-            'axis'         => 'integer',
-            'is_cut'       => 'boolean',
-            'is_pierced'   => 'boolean',
+            'diameter' => 'decimal:2',
+            'weight' => 'decimal:3',
+            'axis' => 'integer',
+            'is_cut' => 'boolean',
+            'is_pierced' => 'boolean',
             'is_overstrike' => 'boolean',
         ];
     }

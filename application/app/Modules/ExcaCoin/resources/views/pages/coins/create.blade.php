@@ -1,1 +1,1 @@
-@include('pages.coins._form')
+@include('exca-coin::pages.coins._form')

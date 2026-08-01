@@ -2,11 +2,23 @@
 
 namespace App\Providers;
 
+use App\Livewire\NotificationBell;
+use App\Models\ActivityLog;
+use App\Models\Language;
+use App\Models\SystemSetting;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Fortify\Features;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,32 +37,33 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
-        app('livewire')->component('notification-bell', \App\Livewire\NotificationBell::class);
+        app('livewire')->component('notification-bell', NotificationBell::class);
 
         // Implicitly grant 'super-admin' role all permissions
-        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+        Gate::before(function ($user, $ability) {
             return $user->hasRole('super-admin') ? true : null;
         });
 
         // Register toSystemFormat Carbon Macro
-        \Illuminate\Support\Carbon::macro('toSystemFormat', function () {
-            /** @var \Illuminate\Support\Carbon $this */
-            $format = \App\Models\SystemSetting::get('date_format', 'd.m.Y H:i');
+        Carbon::macro('toSystemFormat', function () {
+            /** @var Carbon $this */
+            $format = SystemSetting::get('date_format', 'd.m.Y H:i');
+
             return $this->format($format);
         });
 
         // Record Auth events (Login, Logout, Failed)
-        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Login::class, function ($event) {
-            \App\Models\ActivityLog::record(
+        Event::listen(Login::class, function ($event) {
+            ActivityLog::record(
                 event: 'login',
                 description: 'Kullanıcı sisteme başarılı şekilde giriş yaptı.',
                 user: $event->user
             );
         });
 
-        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Logout::class, function ($event) {
+        Event::listen(Logout::class, function ($event) {
             if ($event->user) {
-                \App\Models\ActivityLog::record(
+                ActivityLog::record(
                     event: 'logout',
                     description: 'Kullanıcı oturumunu kapattı.',
                     user: $event->user
@@ -58,36 +71,36 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
-        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Failed::class, function ($event) {
-            \App\Models\ActivityLog::record(
+        Event::listen(Failed::class, function ($event) {
+            ActivityLog::record(
                 event: 'failed_login',
-                description: 'Başarısız giriş denemesi yapıldı: ' . ($event->credentials['email'] ?? 'bilinmiyor'),
+                description: 'Başarısız giriş denemesi yapıldı: '.($event->credentials['email'] ?? 'bilinmiyor'),
                 user: $event->user
             );
         });
 
-        if (!app()->runningInConsole() && \Illuminate\Support\Facades\Schema::hasTable('system_settings')) {
-            $appName = \App\Models\SystemSetting::get('app_name');
-            if (!empty($appName)) {
+        if (! app()->runningInConsole() && Schema::hasTable('system_settings')) {
+            $appName = SystemSetting::get('app_name');
+            if (! empty($appName)) {
                 config(['app.name' => $appName]);
             }
 
-            $tz = \App\Models\SystemSetting::get('timezone');
-            if (!empty($tz)) {
+            $tz = SystemSetting::get('timezone');
+            if (! empty($tz)) {
                 config(['app.timezone' => $tz]);
                 date_default_timezone_set($tz);
             }
 
-            $allowReg = \App\Models\SystemSetting::get('allow_registration');
-            if ($allowReg !== null && !filter_var($allowReg, FILTER_VALIDATE_BOOLEAN)) {
-                config(['fortify.features' => array_filter(config('fortify.features', []), fn($f) => $f !== \Laravel\Fortify\Features::registration())]);
+            $allowReg = SystemSetting::get('allow_registration');
+            if ($allowReg !== null && ! filter_var($allowReg, FILTER_VALIDATE_BOOLEAN)) {
+                config(['fortify.features' => array_filter(config('fortify.features', []), fn ($f) => $f !== Features::registration())]);
             }
         }
 
         // Override available_locales from database-driven Language model
-        if (!app()->runningInConsole() && \Illuminate\Support\Facades\Schema::hasTable('languages')) {
-            $dbLocales = \App\Models\Language::getActiveKeyed();
-            if (!empty($dbLocales)) {
+        if (! app()->runningInConsole() && Schema::hasTable('languages')) {
+            $dbLocales = Language::getActiveKeyed();
+            if (! empty($dbLocales)) {
                 config(['app.available_locales' => $dbLocales]);
             }
         }

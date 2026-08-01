@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace App\Modules\ExcaCoin\Models;
 
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Translatable\HasTranslations;
-
-use App\Traits\LogsActivity;
 
 class Dictionary extends Model
 {
@@ -38,12 +37,12 @@ class Dictionary extends Model
      * Dictionary tipleri
      */
     const TYPES = [
-        'period'       => ['tr' => 'Dönem',      'en' => 'Period'],
-        'authority'    => ['tr' => 'Otorite',     'en' => 'Authority'],
-        'ruler'        => ['tr' => 'Hükümdar',    'en' => 'Ruler'],
-        'region'       => ['tr' => 'Bölge',       'en' => 'Region'],
-        'mint'         => ['tr' => 'Darphane',    'en' => 'Mint'],
-        'metal'        => ['tr' => 'Metal',       'en' => 'Metal'],
+        'period' => ['tr' => 'Dönem',      'en' => 'Period'],
+        'authority' => ['tr' => 'Otorite',     'en' => 'Authority'],
+        'ruler' => ['tr' => 'Hükümdar',    'en' => 'Ruler'],
+        'region' => ['tr' => 'Bölge',       'en' => 'Region'],
+        'mint' => ['tr' => 'Darphane',    'en' => 'Mint'],
+        'metal' => ['tr' => 'Metal',       'en' => 'Metal'],
         'denomination' => ['tr' => 'Birim',       'en' => 'Denomination'],
     ];
 

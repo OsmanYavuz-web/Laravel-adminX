@@ -1,0 +1,73 @@
+<?php
+
+/*
+|--------------------------------------------------------------------------
+| {{name}} Module Manifest
+|--------------------------------------------------------------------------
+|
+| title          : Module title shown in the sidebar & roles page.
+|                  May be a string or an array keyed by locale.
+| description    : Optional module description (string or locale array).
+| enabled        : Set to false to hide the module completely.
+| priority       : Sort order for the roles page permission groups.
+| icon / color   : Default icon & accent color (see partials/module-nav/colors.blade.php).
+| permissions    : Permission definitions:  'prefix.action' => ['tr' => ..., 'en' => ...].
+|                  Grouped on the roles page by the prefix part.
+| menu           : Sidebar sections. Types: "link" or "group".
+|                  link:   title, icon, color, route, permission, active (route patterns)
+|                  group:  title, icon, color, permission (string|array, can-any), children[]
+|                  order  : integer, global sidebar position.
+| groups         : Optional overrides for the roles page grouping.
+| routes         : Optional route file, loaded inside the admin prefix
+|                  with the auth+verified middleware group.
+| views / lang   : Optional directories auto-registered as view/translation namespaces.
+| migrations     : Optional directory of module migrations (auto-loaded).
+|
+*/
+
+return [
+    'name' => '{{slug}}',
+
+    'title' => [
+        'tr' => '{{name}}',
+        'en' => '{{name}}',
+    ],
+
+    'description' => [
+        'tr' => '{{name}} modülü.',
+        'en' => 'The {{name}} module.',
+    ],
+
+    'enabled' => true,
+
+    'priority' => 500,
+
+    'icon' => 'folder',
+
+    'color' => 'brand',
+
+    'permissions' => [
+        '{{permission}}.view' => ['tr' => '{{name}} Görüntüle', 'en' => 'View {{name}}'],
+        '{{permission}}.create' => ['tr' => '{{name}} Oluştur', 'en' => 'Create {{name}}'],
+        '{{permission}}.update' => ['tr' => '{{name}} Düzenle', 'en' => 'Update {{name}}'],
+        '{{permission}}.delete' => ['tr' => '{{name}} Sil', 'en' => 'Delete {{name}}'],
+    ],
+
+    'menu' => [
+        [
+            'type' => 'link',
+            'title' => ['tr' => '{{name}}', 'en' => '{{name}}'],
+            'icon' => 'folder',
+            'color' => 'brand',
+            'route' => '{{slug}}.index',
+            'permission' => '{{permission}}.view',
+            'active' => ['{{slug}}.*'],
+            'order' => 20,
+        ],
+    ],
+
+    'routes' => __DIR__.'/routes/web.php',
+    'views' => __DIR__.'/resources/views',
+    'lang' => __DIR__.'/resources/lang',
+    'migrations' => __DIR__.'/database/migrations',
+];

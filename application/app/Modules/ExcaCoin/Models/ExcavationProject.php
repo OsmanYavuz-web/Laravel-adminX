@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Models;
+namespace App\Modules\ExcaCoin\Models;
 
+use App\Models\User;
+use App\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
-use App\Traits\LogsActivity;
 
 class ExcavationProject extends Model
 {
@@ -29,14 +31,14 @@ class ExcavationProject extends Model
     protected function casts(): array
     {
         return [
-            'is_active'      => 'boolean',
-            'start_date'     => 'date',
-            'end_date'       => 'date',
+            'is_active' => 'boolean',
+            'start_date' => 'date',
+            'end_date' => 'date',
             'visible_fields' => 'array',
         ];
     }
 
-    public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'excavation_project_user');
     }
@@ -44,7 +46,7 @@ class ExcavationProject extends Model
     /**
      * Scope query to only include projects accessible by the specified or current user.
      */
-    public function scopeAccessibleBy(\Illuminate\Database\Eloquent\Builder $query, ?User $user = null): \Illuminate\Database\Eloquent\Builder
+    public function scopeAccessibleBy(Builder $query, ?User $user = null): Builder
     {
         $user = $user ?? auth()->user();
 

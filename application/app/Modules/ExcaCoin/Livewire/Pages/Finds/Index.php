@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Livewire\Pages\Finds;
+namespace App\Modules\ExcaCoin\Livewire\Pages\Finds;
 
-use App\Models\ExcavationProject;
-use App\Models\Find;
+use App\Modules\ExcaCoin\Models\ExcavationProject;
+use App\Modules\ExcaCoin\Models\Find;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -17,10 +17,13 @@ class Index extends Component
 
     #[Url(as: 'q')]
     public string $search = '';
+
     public string $filterSeason = '';
-    public string $filterArea   = '';
+
+    public string $filterArea = '';
 
     public bool $showDeleteModal = false;
+
     public ?int $deletingId = null;
 
     public function mount(): void
@@ -38,8 +41,8 @@ class Index extends Component
             ->withCount('coins')
             ->when($this->search, fn ($q) => $q->where(function ($q) {
                 $q->where('inventory_number', 'like', "%{$this->search}%")
-                  ->orWhere('excavation_area', 'like', "%{$this->search}%")
-                  ->orWhere('find_note', 'like', "%{$this->search}%");
+                    ->orWhere('excavation_area', 'like', "%{$this->search}%")
+                    ->orWhere('find_note', 'like', "%{$this->search}%");
             }))
             ->when($this->filterSeason, fn ($q) => $q->where('excavation_season', $this->filterSeason))
             ->when($this->filterArea, fn ($q) => $q->where('excavation_area', 'like', "%{$this->filterArea}%"))
@@ -59,9 +62,20 @@ class Index extends Component
             ->toArray();
     }
 
-    public function updatedSearch(): void { $this->resetPage(); }
-    public function updatedFilterSeason(): void { $this->resetPage(); }
-    public function updatedFilterArea(): void { $this->resetPage(); }
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterSeason(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterArea(): void
+    {
+        $this->resetPage();
+    }
 
     public function confirmDelete(int $id): void
     {
@@ -71,7 +85,9 @@ class Index extends Component
 
     public function delete(): void
     {
-        if (! $this->deletingId) return;
+        if (! $this->deletingId) {
+            return;
+        }
 
         $find = Find::withCount('coins')->findOrFail($this->deletingId);
 
@@ -79,6 +95,7 @@ class Index extends Component
             $this->dispatch('toast', message: __('Bu buluntuda sikke kaydı bulunduğu için silinemez.'), type: 'danger');
             $this->showDeleteModal = false;
             $this->deletingId = null;
+
             return;
         }
 
@@ -94,8 +111,9 @@ class Index extends Component
 
     public function render()
     {
-        $title = __('Buluntular') . ($this->project && $this->project->exists ? ' — ' . $this->project->name : '');
-        return view('pages.finds.index')
+        $title = __('Buluntular').($this->project && $this->project->exists ? ' — '.$this->project->name : '');
+
+        return view('exca-coin::pages.finds.index')
             ->layout('layouts.app', ['title' => $title]);
     }
 }

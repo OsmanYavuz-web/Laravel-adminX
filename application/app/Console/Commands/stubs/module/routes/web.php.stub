@@ -1,0 +1,10 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+// All routes in this file are registered inside the admin prefix with
+// the auth + verified middleware (see ModuleBootstrapper).
+// Single-file Livewire pages live in resources/views/pages and are
+// referenced with the "<module>::<path>" component name.
+
+Route::livewire('{{slug}}', '{{slug}}::{{slug}}.index')->name('{{slug}}.index');

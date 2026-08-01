@@ -285,7 +285,7 @@
                         {{ __('Buluntu Opsiyonel Alanları') }}
                     </h5>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-48 overflow-y-auto p-2 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-700">
-                        @foreach(\App\Livewire\Pages\ExcavationProjects\Index::$availableFindFields as $fKey => $fLabel)
+                        @foreach(\App\Modules\ExcaCoin\Livewire\Pages\ExcavationProjects\Index::$availableFindFields as $fKey => $fLabel)
                             <label class="flex items-center gap-2 text-xs text-zinc-700 dark:text-zinc-300 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700/50 p-1 rounded">
                                 <input type="checkbox" wire:model="visibleFields" value="{{ $fKey }}" class="rounded text-amber-600 focus:ring-amber-500 border-zinc-300 dark:border-zinc-600" />
                                 <span class="truncate">{{ __($fLabel) }}</span>
@@ -301,7 +301,7 @@
                         {{ __('Sikke Opsiyonel Alanları') }}
                     </h5>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-48 overflow-y-auto p-2 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-700">
-                        @foreach(\App\Livewire\Pages\ExcavationProjects\Index::$availableCoinFields as $cKey => $cLabel)
+                        @foreach(\App\Modules\ExcaCoin\Livewire\Pages\ExcavationProjects\Index::$availableCoinFields as $cKey => $cLabel)
                             <label class="flex items-center gap-2 text-xs text-zinc-700 dark:text-zinc-300 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700/50 p-1 rounded">
                                 <input type="checkbox" wire:model="visibleFields" value="{{ $cKey }}" class="rounded text-amber-600 focus:ring-amber-500 border-zinc-300 dark:border-zinc-600" />
                                 <span class="truncate">{{ __($cLabel) }}</span>

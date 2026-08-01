@@ -31,7 +31,7 @@
                     'bg-white/25 text-white' => $activeType === $typeKey,
                     'bg-zinc-100 dark:bg-zinc-700 text-zinc-500' => $activeType !== $typeKey,
                 ])>
-                    {{ \App\Models\Dictionary::where('type', $typeKey)->count() }}
+                    {{ \App\Modules\ExcaCoin\Models\Dictionary::where('type', $typeKey)->count() }}
                 </span>
             </button>
         @endforeach

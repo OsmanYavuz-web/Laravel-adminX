@@ -13,7 +13,7 @@ trait LogsActivity
     protected static function bootLogsActivity(): void
     {
         static::created(function (Model $model) {
-            static::logModelEvent($model, 'created', 'Created model ' . class_basename($model) . ' #' . $model->getKey(), [
+            static::logModelEvent($model, 'created', 'Created model '.class_basename($model).' #'.$model->getKey(), [
                 'attributes' => $model->getFilteredAttributes($model->getAttributes()),
             ]);
         });
@@ -26,8 +26,8 @@ trait LogsActivity
             $oldDiff = $model->getFilteredAttributes($original);
             $newDiff = $model->getFilteredAttributes($changes);
 
-            if (!empty($newDiff)) {
-                static::logModelEvent($model, 'updated', 'Updated model ' . class_basename($model) . ' #' . $model->getKey(), [
+            if (! empty($newDiff)) {
+                static::logModelEvent($model, 'updated', 'Updated model '.class_basename($model).' #'.$model->getKey(), [
                     'old' => $oldDiff,
                     'attributes' => $newDiff,
                 ]);
@@ -35,7 +35,7 @@ trait LogsActivity
         });
 
         static::deleted(function (Model $model) {
-            static::logModelEvent($model, 'deleted', 'Deleted model ' . class_basename($model) . ' #' . $model->getKey(), [
+            static::logModelEvent($model, 'deleted', 'Deleted model '.class_basename($model).' #'.$model->getKey(), [
                 'old' => $model->getFilteredAttributes($model->getAttributes()),
             ]);
         });
@@ -60,6 +60,7 @@ trait LogsActivity
     protected function getFilteredAttributes(array $attributes): array
     {
         $sensitive = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'];
+
         return array_diff_key($attributes, array_flip($sensitive));
     }
 }

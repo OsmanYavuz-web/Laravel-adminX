@@ -2,12 +2,13 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\Notification;
+use Livewire\Component;
 
 class NotificationBell extends Component
 {
     public int $unreadCount = 0;
+
     public array $notifications = [];
 
     protected $listeners = ['$refresh'];
@@ -20,9 +21,10 @@ class NotificationBell extends Component
     public function loadNotifications(): void
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             $this->unreadCount = 0;
             $this->notifications = [];
+
             return;
         }
 

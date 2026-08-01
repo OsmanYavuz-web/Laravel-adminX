@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -27,14 +28,14 @@ class MediaShare extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function views(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function views(): HasMany
     {
         return $this->hasMany(MediaShareView::class, 'media_share_id');
     }
 
     public function isPasswordProtected(): bool
     {
-        return !empty($this->password);
+        return ! empty($this->password);
     }
 
     public function isExpired(): bool
@@ -44,7 +45,7 @@ class MediaShare extends Model
 
     public function checkPassword(string $inputPassword): bool
     {
-        if (!$this->isPasswordProtected()) {
+        if (! $this->isPasswordProtected()) {
             return true;
         }
 

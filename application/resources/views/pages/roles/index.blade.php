@@ -97,8 +97,9 @@ new #[Title('Roles & Permissions')] #[Layout('layouts.app')] class extends Compo
     public function with(): array
     {
         $permissions = Permission::all();
-        
-        // Group permissions by prefix (e.g., projects, finds, coins, etc.)
+
+        // Group permissions by their prefix (e.g. users, finds, coins...).
+        // Group titles, icons and colors come from the module manifests.
         $groupedPermissions = [];
         foreach ($permissions as $perm) {
             $parts = explode('.', $perm->name);
@@ -110,34 +111,7 @@ new #[Title('Roles & Permissions')] #[Layout('layouts.app')] class extends Compo
             'roles' => Role::with('permissions')->get(),
             'groupedPermissions' => $groupedPermissions,
             'languages' => Language::getActive(),
-            'groupIcons' => [
-                'users' => 'users',
-                'roles' => 'shield-check',
-                'settings' => 'adjustments-horizontal',
-                'languages' => 'language',
-                'logs' => 'clipboard-document-list',
-                'backups' => 'archive-box',
-                'media' => 'photo',
-                'dictionaries' => 'book-open',
-                'excavation_projects' => 'map-pin',
-                'finds' => 'archive-box',
-                'coins' => 'circle-stack',
-                'quick_entry' => 'bolt',
-            ],
-            'groupTitles' => [
-                'users' => __('User Management'),
-                'roles' => __('Roles & Permissions'),
-                'settings' => __('System Settings'),
-                'languages' => __('Languages'),
-                'logs' => __('Activity Logs'),
-                'backups' => __('Backups Management'),
-                'media' => __('Media Library'),
-                'dictionaries' => __('Nümismatik Sözlükler'),
-                'excavation_projects' => __('Kazı Projeleri'),
-                'finds' => __('Buluntular'),
-                'coins' => __('Sikkeler'),
-                'quick_entry' => __('Hızlı Veri Girişi'),
-            ],
+            'groupMeta' => app(\App\Support\Modules\ModuleManager::class)->permissionGroups(),
         ];
     }
 }; ?>
@@ -253,11 +227,12 @@ new #[Title('Roles & Permissions')] #[Layout('layouts.app')] class extends Compo
                         </flux:label>
 
                         <div class="space-y-4 max-h-[520px] overflow-y-auto pr-2">
+                            @php($navColors = nav_colors())
                             @foreach($groupedPermissions as $group => $perms)
                                 <div class="space-y-2.5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-800/20 p-4">
                                     <div class="flex items-center gap-2 font-bold text-xs uppercase text-zinc-500 dark:text-zinc-400">
-                                        <flux:icon :icon="$groupIcons[$group] ?? 'folder'" class="size-4 text-brand" />
-                                        <span>{{ $groupTitles[$group] ?? __(Str::headline($group)) }}</span>
+                                        <flux:icon :icon="$groupMeta[$group]['icon'] ?? 'folder'" class="size-4 {{ isset($groupMeta[$group]['color']) ? ($navColors['soft'][$groupMeta[$group]['color']] ?? 'text-brand') : 'text-brand' }}" />
+                                        <span>{{ $groupMeta[$group]['title'] ?? __(Str::headline($group)) }}</span>
                                     </div>
 
                                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-1">

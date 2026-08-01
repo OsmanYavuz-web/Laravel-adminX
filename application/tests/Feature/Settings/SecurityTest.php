@@ -4,6 +4,7 @@ namespace Tests\Feature\Settings;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Fortify\Features;
 use Livewire\Livewire;
@@ -26,7 +27,13 @@ class SecurityTest extends TestCase
         Features::passkeys([
             'confirmPassword' => true,
         ]);
-        \Illuminate\Support\Facades\App::setLocale('en');
+        config([
+            'fortify.features' => array_merge(
+                array_filter(config('fortify.features', [])),
+                [Features::passkeys(['confirmPassword' => true])],
+            ),
+        ]);
+        App::setLocale('en');
     }
 
     public function test_security_settings_page_can_be_rendered(): void
@@ -40,8 +47,8 @@ class SecurityTest extends TestCase
         $response->assertOk();
 
         $response->assertSee('Passkeys');
-        $response->assertSee('No passkeys yet');
-        $response->assertSee('Two-factor authentication');
+        $response->assertSee(__('No passkeys yet'));
+        $response->assertSee(__('Two-factor authentication'));
         $response->assertSee('Enable 2FA');
     }
 

@@ -1,19 +1,22 @@
 <?php
 
-namespace App\Livewire\Components;
+namespace App\Modules\ExcaCoin\Livewire\Components;
 
-use App\Models\Dictionary;
 use App\Models\Language;
+use App\Modules\ExcaCoin\Models\Dictionary;
 use Livewire\Component;
 
 class QuickAddDictionary extends Component
 {
-    public string  $type      = '';
-    public string  $modalName = '';
-    public array   $name      = [];
-    public string  $code      = '';
+    public string $type = '';
 
-    public bool    $showModal = false;
+    public string $modalName = '';
+
+    public array $name = [];
+
+    public string $code = '';
+
+    public bool $showModal = false;
 
     public function mount(): void
     {
@@ -26,7 +29,7 @@ class QuickAddDictionary extends Component
 
         return [
             "name.{$defaultLang}" => 'required|string|max:150',
-            'code'                => 'nullable|string|max:20',
+            'code' => 'nullable|string|max:20',
         ];
     }
 
@@ -52,17 +55,17 @@ class QuickAddDictionary extends Component
         $primaryName = array_filter($this->name)[app()->getLocale()] ?? reset($this->name) ?? '';
 
         $item = Dictionary::create([
-            'type'       => $this->type,
-            'code'       => $this->code ?: null,
-            'name'       => array_filter($this->name),
+            'type' => $this->type,
+            'code' => $this->code ?: null,
+            'name' => array_filter($this->name),
             'sort_order' => 0,
-            'is_active'  => true,
+            'is_active' => true,
         ]);
 
         // Üst bileşene bildir: yeni eklenen ID ve isim
         $this->dispatch('dictionary-quick-added', [
             'type' => $this->type,
-            'id'   => $item->id,
+            'id' => $item->id,
             'name' => $primaryName,
         ]);
 
@@ -91,7 +94,7 @@ class QuickAddDictionary extends Component
     {
         $typeLabel = Dictionary::TYPES[$this->type][app()->getLocale()] ?? $this->type;
 
-        return view('livewire.components.quick-add-dictionary', [
+        return view('exca-coin::livewire.components.quick-add-dictionary', [
             'typeLabel' => $typeLabel,
         ]);
     }

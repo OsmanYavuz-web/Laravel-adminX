@@ -36,7 +36,7 @@
                     </flux:label>
                     <flux:select wire:model.live="projectId" x-searchable required>
                         <option value="">{{ __('Proje Seçin...') }}</option>
-                        @foreach(\App\Models\ExcavationProject::accessibleBy()->get() as $p)
+                        @foreach(\App\Modules\ExcaCoin\Models\ExcavationProject::accessibleBy()->get() as $p)
                             <option value="{{ $p->id }}">{{ $p->name }} ({{ $p->site_name }})</option>
                         @endforeach
                     </flux:select>
@@ -79,7 +79,7 @@
                 </flux:field>
             </div>
            @php
-            $activeProject = $project && $project->exists ? $project : ($projectId ? \App\Models\ExcavationProject::find($projectId) : null);
+            $activeProject = $project && $project->exists ? $project : ($projectId ? \App\Modules\ExcaCoin\Models\ExcavationProject::find($projectId) : null);
         @endphp
 
         @if(!$activeProject || $activeProject->hasAnyFieldVisible(['excavation_season', 'sector', 'area', 'trench', 'square', 'sub_square', 'locus', 'context', 'stratigraphic_unit', 'unit', 'layer', 'level', 'phase', 'feature', 'grave_number', 'structure', 'room', 'architectural_feature']))
