@@ -1,0 +1,32 @@
+Alan (TÅrkáe),òngilizce Karüçlçßç,Durum,Aáçklama
+Kazç Sezonu,Excavation Season,Opsiyonel,Kazç yçlç veya sezonu
+Kazç Alanç,Excavation Area / Site,Zorunlu,Buluntunun geldißi ana kazç alanç
+Sektîr,Sector,Opsiyonel,Kazç alançnçn alt bîlÅmÅ
+Alan,Area,Opsiyonel,Kullançlan kazç sistemine gîre
+Aáma,Trench,Opsiyonel,Aáma sistemi kullançlan kazçlarda
+Kare,Square / Grid Square,Opsiyonel,Grid sistemi kullançlçyorsa
+Alt Kare,Sub-square,Opsiyonel,Kare alt bîlÅmlere ayrçlmçüsa
+Locus,Locus,Opsiyonel,Locus sistemi kullançlçyorsa
+Konteks,Context,Opsiyonel,Context sistemi kullançlçyorsa
+Stratigrafik Birim,Stratigraphic Unit (SU),Opsiyonel,SU sistemi kullançlçyorsa
+Unit / Birim,Unit,Opsiyonel,Farklç kazç sistemlerinde kullançlan genel birim
+Tabaka,Layer / Stratum,Opsiyonel,Stratigrafik tabaka bilgisi
+Seviye,Level,Opsiyonel,Kazç seviyesine dayalç sistemlerde
+Evre,Phase,Opsiyonel,Kronolojik veya mimari faz
+Feature / ôzellik,Feature,Opsiyonel,Baßçmsçz arkeolojik îzellik
+Mezar Numarasç,Grave Number,Opsiyonel,Buluntu bir mezar veya gîmÅ baßlamçndan geliyorsa mezar numarasç
+Yapç,Structure / Building,Opsiyonel,Yapç ile iliükiliyse
+MekÉn,Room / Space,Opsiyonel,Buluntu bir mekÉndan geliyorsa
+Mimari Unsur,Architectural Feature,Opsiyonel,"Duvar, taban, ocak vb."
+Buluntu Yeri,Find Spot,Opsiyonel,Buluntunun spesifik konumu
+Kot,Elevation,Opsiyonel,Buluntunun bulundußu yÅkseklik
+Koordinatlar,X / Y / Z,Opsiyonel,Buluntunun yatay koordinatç (X)
+,,,
+,,,
+Buluntu Tarihi,Find Date,Zorunlu,Buluntunun kazçda ele geátißi tarih
+Buluntu Numarasç,Find Number,Opsiyonel,Kazçnçn buluntu numarasç sistemi varsa
+Envanter Numarasç,Inventory Number,Zorunlu,Sikke envantere alçndçßçnda
+Torba Numarasç,Bag Number,Opsiyonel,Torba sistemi kullançlçyorsa
+,,,
+Buluntu Grubu,Find Group,Opsiyonel,Birlikte ele geáen buluntular iáin
+Buluntu Notu,Find Note,Opsiyonel,Serbest aáçklama alanç

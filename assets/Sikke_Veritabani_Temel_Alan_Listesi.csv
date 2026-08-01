@@ -1,0 +1,32 @@
+Alan (T�rk�e),�ngilizce Kar��l���,Durum,A��klama
+Kaz� Sezonu,Excavation Season,Opsiyonel,Kaz� y�l� veya sezonu
+Kaz� Alan�,Excavation Area / Site,Zorunlu,Buluntunun geldi�i ana kaz� alan�
+Sekt�r,Sector,Opsiyonel,Kaz� alan�n�n alt b�l�m�
+Alan,Area,Opsiyonel,Kullan�lan kaz� sistemine g�re
+A�ma,Trench,Opsiyonel,A�ma sistemi kullan�lan kaz�larda
+Kare,Square / Grid Square,Opsiyonel,Grid sistemi kullan�l�yorsa
+Alt Kare,Sub-square,Opsiyonel,Kare alt b�l�mlere ayr�lm��sa
+Locus,Locus,Opsiyonel,Locus sistemi kullan�l�yorsa
+Konteks,Context,Opsiyonel,Context sistemi kullan�l�yorsa
+Stratigrafik Birim,Stratigraphic Unit (SU),Opsiyonel,SU sistemi kullan�l�yorsa
+Unit / Birim,Unit,Opsiyonel,Farkl� kaz� sistemlerinde kullan�lan genel birim
+Tabaka,Layer / Stratum,Opsiyonel,Stratigrafik tabaka bilgisi
+Seviye,Level,Opsiyonel,Kaz� seviyesine dayal� sistemlerde
+Evre,Phase,Opsiyonel,Kronolojik veya mimari faz
+Feature / �zellik,Feature,Opsiyonel,Ba��ms�z arkeolojik �zellik
+Mezar Numaras�,Grave Number,Opsiyonel,Buluntu bir mezar veya g�m� ba�lam�ndan geliyorsa mezar numaras�
+Yap�,Structure / Building,Opsiyonel,Yap� ile ili�kiliyse
+Mek�n,Room / Space,Opsiyonel,Buluntu bir mek�ndan geliyorsa
+Mimari Unsur,Architectural Feature,Opsiyonel,"Duvar, taban, ocak vb."
+Buluntu Yeri,Find Spot,Opsiyonel,Buluntunun spesifik konumu
+Kot,Elevation,Opsiyonel,Buluntunun bulundu�u y�kseklik
+Koordinatlar,X / Y / Z,Opsiyonel,Buluntunun yatay koordinat� (X)
+,,,
+,,,
+Buluntu Tarihi,Find Date,Zorunlu,Buluntunun kaz�da ele ge�ti�i tarih
+Buluntu Numaras�,Find Number,Opsiyonel,Kaz�n�n buluntu numaras� sistemi varsa
+Envanter Numaras�,Inventory Number,Zorunlu,Sikke envantere al�nd���nda
+Torba Numaras�,Bag Number,Opsiyonel,Torba sistemi kullan�l�yorsa
+,,,
+Buluntu Grubu,Find Group,Opsiyonel,Birlikte ele ge�en buluntular i�in
+Buluntu Notu,Find Note,Opsiyonel,Serbest a��klama alan�

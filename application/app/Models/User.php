@@ -52,6 +52,11 @@ class User extends Authenticatable implements PasskeyUser
         ];
     }
 
+    public function excavationProjects(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(ExcavationProject::class, 'excavation_project_user');
+    }
+
     /**
      * Get the user's initials
      */

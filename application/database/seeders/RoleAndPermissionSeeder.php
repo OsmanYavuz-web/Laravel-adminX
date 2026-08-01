@@ -47,6 +47,30 @@ class RoleAndPermissionSeeder extends Seeder
             'media.view'     => ['tr' => 'Medya Kütüphanesini Görüntüle', 'en' => 'View Media Library'],
             'media.create'   => ['tr' => 'Medya Yükle', 'en' => 'Upload Media'],
             'media.delete'   => ['tr' => 'Medya Sil', 'en' => 'Delete Media'],
+            // ExcaCoin — Sözlükler
+            'dictionaries.view'   => ['tr' => 'Sözlükleri Görüntüle', 'en' => 'View Dictionaries'],
+            'dictionaries.create' => ['tr' => 'Sözlük Ekle', 'en' => 'Create Dictionary Entry'],
+            'dictionaries.update' => ['tr' => 'Sözlük Düzenle', 'en' => 'Update Dictionary Entry'],
+            'dictionaries.delete' => ['tr' => 'Sözlük Sil', 'en' => 'Delete Dictionary Entry'],
+            // ExcaCoin — Kazı Projeleri
+            'excavation_projects.view'   => ['tr' => 'Kazı Projelerini Görüntüle', 'en' => 'View Excavation Projects'],
+            'excavation_projects.create' => ['tr' => 'Kazı Projesi Oluştur', 'en' => 'Create Excavation Project'],
+            'excavation_projects.update' => ['tr' => 'Kazı Projesi Düzenle', 'en' => 'Update Excavation Project'],
+            'excavation_projects.delete' => ['tr' => 'Kazı Projesi Sil', 'en' => 'Delete Excavation Project'],
+            // ExcaCoin — Buluntular
+            'finds.view'   => ['tr' => 'Buluntuları Görüntüle', 'en' => 'View Finds'],
+            'finds.create' => ['tr' => 'Buluntu Ekle', 'en' => 'Create Find'],
+            'finds.update' => ['tr' => 'Buluntu Düzenle', 'en' => 'Update Find'],
+            'finds.delete' => ['tr' => 'Buluntu Sil', 'en' => 'Delete Find'],
+            // ExcaCoin — Sikkeler
+            'coins.view'   => ['tr' => 'Sikkeleri Görüntüle', 'en' => 'View Coins'],
+            'coins.create' => ['tr' => 'Sikke Ekle', 'en' => 'Create Coin'],
+            'coins.update' => ['tr' => 'Sikke Düzenle', 'en' => 'Update Coin'],
+            'coins.delete' => ['tr' => 'Sikke Sil', 'en' => 'Delete Coin'],
+            'coins.export' => ['tr' => 'Sikkeleri Dışa Aktar', 'en' => 'Export Coins'],
+            'finds.export' => ['tr' => 'Buluntuları Dışa Aktar', 'en' => 'Export Finds'],
+            // ExcaCoin — Hızlı Veri Girişi
+            'quick_entry.access' => ['tr' => 'Hızlı Veri Girişine Eriş', 'en' => 'Access Quick Data Entry'],
         ];
 
         foreach ($permissions as $name => $displayName) {
@@ -79,11 +103,21 @@ class RoleAndPermissionSeeder extends Seeder
         $managerRole = Role::findByName('manager', 'web');
         $managerRole->givePermissionTo([
             'users.view', 'media.view', 'media.create', 'logs.view', 'backups.view',
+            // ExcaCoin
+            'dictionaries.view', 'dictionaries.create', 'dictionaries.update',
+            'excavation_projects.view', 'excavation_projects.create', 'excavation_projects.update',
+            'finds.view', 'finds.create', 'finds.update', 'finds.export',
+            'coins.view', 'coins.create', 'coins.update', 'coins.export',
         ]);
 
         $userRole = Role::findByName('user', 'web');
         $userRole->givePermissionTo([
             'media.view',
+            // ExcaCoin — yalnızca görüntüleme
+            'dictionaries.view',
+            'excavation_projects.view',
+            'finds.view',
+            'coins.view',
         ]);
 
         // Assign Super Admin role to main admin user

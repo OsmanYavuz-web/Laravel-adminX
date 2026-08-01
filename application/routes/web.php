@@ -50,6 +50,24 @@ if ($adminPrefix) {
 
 Route::prefix($adminPrefix)->middleware(['auth', 'verified'])->group(function () {
     Route::livewire('dashboard', 'pages::dashboard')->name('dashboard');
+
+    // --- ExcaCoin ---
+    Route::get('quick-entry', \App\Livewire\Pages\QuickEntry\Index::class)->name('quick-entry.index');
+    Route::get('dictionaries', \App\Livewire\Pages\Dictionaries\Index::class)->name('dictionaries.index');
+    Route::get('excavation-projects', \App\Livewire\Pages\ExcavationProjects\Index::class)->name('excavation-projects.index');
+    Route::get('finds', \App\Livewire\Pages\Finds\Index::class)->name('all-finds.index');
+    Route::get('finds/create', \App\Livewire\Pages\Finds\Create::class)->name('all-finds.create');
+    Route::get('coins', \App\Livewire\Pages\Coins\Index::class)->name('all-coins.index');
+    Route::get('coins/create', \App\Livewire\Pages\Coins\Create::class)->name('all-coins.create');
+    Route::get('excavation-projects/{project}/finds', \App\Livewire\Pages\Finds\Index::class)->name('finds.index');
+    Route::get('excavation-projects/{project}/finds/create', \App\Livewire\Pages\Finds\Create::class)->name('finds.create');
+    Route::get('excavation-projects/{project}/finds/{find}/edit', \App\Livewire\Pages\Finds\Edit::class)->name('finds.edit');
+    Route::get('excavation-projects/{project}/finds/{find}/coins', \App\Livewire\Pages\Coins\Index::class)->name('coins.index');
+    Route::get('excavation-projects/{project}/finds/{find}/coins/create', \App\Livewire\Pages\Coins\Create::class)->name('coins.create');
+    Route::get('excavation-projects/{project}/finds/{find}/coins/{coin}/edit', \App\Livewire\Pages\Coins\Edit::class)->name('coins.edit');
+    Route::get('excavation-projects/{project}/finds/{find}/coins/{coin}', \App\Livewire\Pages\Coins\Show::class)->name('coins.show');
+
+    // --- Sistem ---
     Route::livewire('users', 'pages::users.index')->name('users.index');
     Route::livewire('roles', 'pages::roles.index')->name('roles.index');
     Route::livewire('settings/system', 'pages::settings.system')->name('settings.system');
