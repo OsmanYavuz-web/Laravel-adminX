@@ -46,7 +46,7 @@
                                 {{ __('Log in') }}
                             </a>
 
-                            @if (Route::has('register'))
+                            @if (filter_var(\App\Models\SystemSetting::get('allow_registration', true), FILTER_VALIDATE_BOOLEAN) && Route::has('register'))
                                 <a href="{{ route('register') }}" class="px-4 py-2 text-sm font-medium rounded-lg bg-brand hover:bg-brand-hover text-white transition-colors shadow-xs">
                                     {{ __('Register') }}
                                 </a>
@@ -84,7 +84,7 @@
                             <span>{{ __('Log in') }}</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                         </a>
-                        @if (Route::has('register'))
+                        @if (filter_var(\App\Models\SystemSetting::get('allow_registration', true), FILTER_VALIDATE_BOOLEAN) && Route::has('register'))
                             <a href="{{ route('register') }}" class="w-full sm:w-auto px-6 py-3 text-sm font-semibold rounded-xl bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white transition-all">
                                 {{ __('Register') }}
                             </a>

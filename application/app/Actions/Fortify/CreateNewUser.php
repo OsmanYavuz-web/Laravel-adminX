@@ -19,6 +19,13 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
+        if (\Illuminate\Support\Facades\Schema::hasTable('system_settings')) {
+            $allowReg = \App\Models\SystemSetting::get('allow_registration');
+            if ($allowReg !== null && !filter_var($allowReg, FILTER_VALIDATE_BOOLEAN)) {
+                abort(403, __('Public user registration is currently disabled by administrator.'));
+            }
+        }
+
         Validator::make($input, [
             ...$this->profileRules(),
             'password' => $this->passwordRules(),

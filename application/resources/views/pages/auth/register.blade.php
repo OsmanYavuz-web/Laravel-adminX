@@ -1,3 +1,7 @@
+@if (!filter_var(\App\Models\SystemSetting::get('allow_registration', true), FILTER_VALIDATE_BOOLEAN))
+    @php abort(403, __('Public user registration is currently disabled by administrator.')); @endphp
+@endif
+
 <x-layouts::auth :title="__('Register')">
     <div class="flex flex-col gap-6">
         <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />

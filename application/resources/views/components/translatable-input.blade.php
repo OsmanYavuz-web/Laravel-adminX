@@ -34,7 +34,7 @@
         <label class="block text-sm font-semibold text-zinc-800 dark:text-zinc-200">
             {{ $label }}
             @if($required)
-                <span class="text-red-500">*</span>
+                <span class="ml-1 text-red-500 font-bold cursor-help" title="{{ __('Zorunlu alan') }}">*</span>
             @endif
         </label>
     @endif

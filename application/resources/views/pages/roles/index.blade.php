@@ -118,6 +118,11 @@ new #[Title('Roles & Permissions')] #[Layout('layouts.app')] class extends Compo
                 'logs' => 'clipboard-document-list',
                 'backups' => 'archive-box',
                 'media' => 'photo',
+                'dictionaries' => 'book-open',
+                'excavation_projects' => 'map-pin',
+                'finds' => 'archive-box',
+                'coins' => 'circle-stack',
+                'quick_entry' => 'bolt',
             ],
             'groupTitles' => [
                 'users' => __('User Management'),
@@ -127,6 +132,11 @@ new #[Title('Roles & Permissions')] #[Layout('layouts.app')] class extends Compo
                 'logs' => __('Activity Logs'),
                 'backups' => __('Backups Management'),
                 'media' => __('Media Library'),
+                'dictionaries' => __('Nümismatik Sözlükler'),
+                'excavation_projects' => __('Kazı Projeleri'),
+                'finds' => __('Buluntular'),
+                'coins' => __('Sikkeler'),
+                'quick_entry' => __('Hızlı Veri Girişi'),
             ],
         ];
     }

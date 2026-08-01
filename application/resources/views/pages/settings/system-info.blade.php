@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Artisan;
 new #[Title('System Information')] #[Layout('layouts.app')] class extends Component {
     public string $cacheResult = '';
 
+    public function mount(): void
+    {
+        abort_unless(auth()->user()->can('settings.view') || auth()->user()->hasRole('super-admin'), 403);
+    }
+
     public function clearCache(string $type): void
     {
         abort_unless(auth()->user()->can('settings.update') || auth()->user()->hasRole('super-admin'), 403);
